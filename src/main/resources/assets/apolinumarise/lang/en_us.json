@@ -1,0 +1,19 @@
+{
+  "block.apolinumarise.awakening_block": "Awakening Block",
+
+  "message.apolinumarise.bloodmoon_awakened": "A crimson pulse ripples through the world... the Blood Moon has been awakened.",
+
+  "apolinumarise.configuration.title": "Apolinum - arise! Configs",
+  "apolinumarise.configuration.section.apolinumarise.server.toml": "Apolinum - arise! Server Configs",
+  "apolinumarise.configuration.section.apolinumarise.server.toml.title": "Apolinum - arise! Server Configs",
+  "apolinumarise.configuration.enableMod": "Enable Mod",
+  "apolinumarise.configuration.awakeningHealthLeft": "Awakening: Health Left",
+  "apolinumarise.configuration.awakeningBlindnessDurationTicks": "Awakening: Blindness Duration (Ticks)",
+  "apolinumarise.configuration.awakeningBlindnessAmplifier": "Awakening: Blindness Amplifier",
+  "apolinumarise.configuration.awakeningNauseaDurationTicks": "Awakening: Nausea Duration (Ticks)",
+  "apolinumarise.configuration.awakeningNauseaAmplifier": "Awakening: Nausea Amplifier",
+  "apolinumarise.configuration.awakeningWeaknessDurationTicks": "Awakening: Weakness Duration (Ticks)",
+  "apolinumarise.configuration.awakeningWeaknessAmplifier": "Awakening: Weakness Amplifier",
+  "apolinumarise.configuration.soundFalloffDistance": "Awakening Sound: Falloff Distance",
+  "apolinumarise.configuration.soundMinVolume": "Awakening Sound: Minimum Volume"
+}
