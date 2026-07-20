@@ -12,5 +12,7 @@ public final class ModNetworking {
         // Lambda (not a method reference) so the client-only handler class is never resolved on a dedicated server.
         registrar.playToClient(AwakeningSoundPayload.TYPE, AwakeningSoundPayload.STREAM_CODEC,
                 (payload, context) -> AwakeningSoundClientHandler.handle(payload, context));
+        registrar.playToClient(BloodMoonSyncPayload.TYPE, BloodMoonSyncPayload.STREAM_CODEC,
+            (payload, context) -> BloodMoonClientHandler.handle(payload, context));
     }
 }

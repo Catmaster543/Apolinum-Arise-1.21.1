@@ -3,5 +3,25 @@
     "sounds": [
       { "name": "apolinumarise:bloodmoon_awakening" }
     ]
+  },
+  "bloodmoon_ambient": {
+    "sounds": [
+      { "name": "apolinumarise:bloodmoon_ambient" }
+    ]
+  },
+  "bloodmoon_start": {
+    "sounds": [
+      { "name": "apolinumarise:bloodmoon_start" }
+    ]
+  },
+  "mosquito_fly": {
+    "sounds": [
+      { "name": "apolinumarise:mosquito_fly" }
+    ]
+  },
+  "mosquito_idle": {
+    "sounds": [
+      { "name": "apolinumarise:mosquito_idle" }
+    ]
   }
 }
