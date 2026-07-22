@@ -2,6 +2,7 @@ package com.fiskerz.apolinum_arise.bloodmoon;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -25,6 +26,14 @@ public final class BloodMoonCommands {
                             context.getSource().sendSuccess(() -> Component.translatable("message.apolinumarise.bloodmoon.forced_stop"), false);
                             return 1;
                         })))
+                .then(Commands.literal("phase")
+                        .then(Commands.argument("value", IntegerArgumentType.integer(0, 7))
+                                .executes(context -> {
+                                    int requested = IntegerArgumentType.getInteger(context, "value");
+                                    int result = BloodMoonEvents.setMoonPhase(context.getSource().getServer(), requested);
+                                    context.getSource().sendSuccess(() -> Component.translatable("message.apolinumarise.bloodmoon.phase_set", result), false);
+                                    return 1;
+                                })))
                 .then(Commands.literal("chance")
                         .executes(context -> {
                             double chance = BloodMoonEvents.getCurrentChance(context.getSource().getServer());

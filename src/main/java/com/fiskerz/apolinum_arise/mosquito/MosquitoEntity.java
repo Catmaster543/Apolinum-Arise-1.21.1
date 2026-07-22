@@ -5,12 +5,15 @@ import javax.annotation.Nullable;
 import com.fiskerz.apolinum_arise.bloodmoon.BloodMoonRegistry;
 import com.fiskerz.apolinum_arise.bloodmoon.BloodMoonState;
 import com.fiskerz.apolinum_arise.config.Config;
+import com.fiskerz.apolinum_arise.infection.InfectionLogic;
 import com.fiskerz.apolinum_arise.util.MoonPhases;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.DifficultyInstance;
@@ -89,6 +92,17 @@ public class MosquitoEntity extends Monster implements GeoEntity {
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, MobSpawnType spawnType, @Nullable SpawnGroupData spawnGroupData) {
         applyBloodMoonScaling();
         return super.finalizeSpawn(level, difficulty, spawnType, spawnGroupData);
+    }
+
+    @Override
+    public boolean doHurtTarget(Entity target) {
+        boolean hit = super.doHurtTarget(target);
+        // Infection roll happens only after the bite's damage actually lands (Patch 2). No infection
+        // consequence beyond the internal state machine yet - that is a later phase.
+        if (hit && target instanceof ServerPlayer player && level() instanceof ServerLevel serverLevel) {
+            InfectionLogic.onBite(player, serverLevel);
+        }
+        return hit;
     }
 
     // Bite damage scales with moon fullness via the shared Phase 3 mapping; detection range is the

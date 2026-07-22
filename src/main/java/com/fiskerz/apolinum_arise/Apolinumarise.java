@@ -35,6 +35,7 @@ public class Apolinumarise {
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
     public Apolinumarise(IEventBus modEventBus, ModContainer modContainer) {
         BloodMoonRegistry.register(modEventBus);
+        com.fiskerz.apolinum_arise.infection.InfectionAttachments.register(modEventBus);
         modEventBus.addListener(ModNetworking::register);
         modEventBus.addListener(Apolinumarise::addCreative);
         modEventBus.addListener(Apolinumarise::onEntityAttributeCreation);
@@ -46,6 +47,7 @@ public class Apolinumarise {
         NeoForge.EVENT_BUS.addListener(Apolinumarise::onPlayerRespawn);
         NeoForge.EVENT_BUS.addListener(Apolinumarise::onPlayerChangedDimension);
         NeoForge.EVENT_BUS.addListener(Apolinumarise::onRegisterCommands);
+        NeoForge.EVENT_BUS.addListener(Apolinumarise::onLevelLoad);
 
         // SERVER config: per-world, admin-controlled (see config.Config)
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SPEC);
@@ -90,5 +92,9 @@ public class Apolinumarise {
 
     private static void onRegisterCommands(RegisterCommandsEvent event) {
         BloodMoonEvents.onRegisterCommands(event);
+    }
+
+    private static void onLevelLoad(net.neoforged.neoforge.event.level.LevelEvent.Load event) {
+        BloodMoonEvents.onLevelLoad(event);
     }
 }

@@ -2,6 +2,7 @@ package com.fiskerz.apolinum_arise.bloodmoon;
 
 import com.fiskerz.apolinum_arise.Apolinumarise;
 import com.fiskerz.apolinum_arise.config.Config;
+import com.fiskerz.apolinum_arise.infection.InfectionLogic;
 import com.fiskerz.apolinum_arise.mosquito.MosquitoSpawner;
 import com.fiskerz.apolinum_arise.network.BloodMoonSyncPayload;
 import com.fiskerz.apolinum_arise.util.MoonPhases;
@@ -61,11 +62,14 @@ public final class BloodMoonEvents {
         // Buffs are Overworld-only; anywhere else this strips a stale modifier from
         // entities that were unloaded mid-Blood-Moon and carried it across.
         boolean active = serverLevel.dimension() == Level.OVERWORLD && BloodMoonState.isActive(serverLevel);
-        updateMobModifiers(livingEntity, active);
+        updateMobModifiers(livingEntity, serverLevel, active);
     }
 
     public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
+            // Resolve any overdue incubation first so a freshly-infected player is treated as such
+            // by the effect application below (isSusceptible).
+            InfectionLogic.onLogin(player);
             syncAndApply(player);
             ShrineEffects.onLogin(player);
         }
@@ -101,7 +105,16 @@ public final class BloodMoonEvents {
 
     public static void onRegisterCommands(RegisterCommandsEvent event) {
         BloodMoonCommands.register(event.getDispatcher(), event.getBuildContext());
+        ShrineCommands.register(event.getDispatcher());
         com.fiskerz.apolinum_arise.mosquito.MosquitoCommands.register(event.getDispatcher());
+    }
+
+    // Prime the worldgen-facing shrine-generation cache from persisted SavedData when the Overworld
+    // loads, before any new chunks generate.
+    public static void onLevelLoad(net.neoforged.neoforge.event.level.LevelEvent.Load event) {
+        if (event.getLevel() instanceof ServerLevel serverLevel && serverLevel.dimension() == Level.OVERWORLD) {
+            ShrineGenerationState.refreshCache(serverLevel);
+        }
     }
 
     static void debugTick(ServerLevel overworld) {
@@ -145,6 +158,16 @@ public final class BloodMoonEvents {
         endBloodMoon(server.overworld());
     }
 
+    // Debug helper: advance world time to the next night whose moon phase equals the target, so the
+    // phase-scaled Weakness/mob-buff logic can be tested without waiting real days. Returns the phase.
+    public static int setMoonPhase(MinecraftServer server, int phase) {
+        ServerLevel overworld = server.overworld();
+        long currentDay = overworld.getDayTime() / Level.TICKS_PER_DAY;
+        long phaseOffset = ((phase - (currentDay % 8L)) + 8L) % 8L;
+        overworld.setDayTime((currentDay + phaseOffset) * Level.TICKS_PER_DAY + 14000L);
+        return overworld.getMoonPhase();
+    }
+
     public static double getCurrentChance(MinecraftServer server) {
         return BloodMoonState.getCurrentChance(server.overworld());
     }
@@ -165,6 +188,8 @@ public final class BloodMoonEvents {
         long day = overworld.getDayTime() / Level.TICKS_PER_DAY;
         if (overworld.isNight() && BloodMoonState.getLastEvaluatedDay(overworld) != day) {
             BloodMoonState.setLastEvaluatedDay(overworld, day);
+            // Same dusk boundary the Blood Moon roll uses: advance incubating players toward infected.
+            InfectionLogic.onDuskTransition(overworld);
             rollBloodMoon(overworld);
         }
 
@@ -228,7 +253,7 @@ public final class BloodMoonEvents {
     private static void refreshActiveOverworldEntities(ServerLevel overworld) {
         for (Entity entity : overworld.getAllEntities()) {
             if (entity instanceof LivingEntity livingEntity && livingEntity instanceof Enemy) {
-                updateMobModifiers(livingEntity, true);
+                updateMobModifiers(livingEntity, overworld, true);
             }
         }
     }
@@ -236,16 +261,22 @@ public final class BloodMoonEvents {
     private static void stripOverworldEntityModifiers(ServerLevel overworld) {
         for (Entity entity : overworld.getAllEntities()) {
             if (entity instanceof LivingEntity livingEntity && livingEntity instanceof Enemy) {
-                updateMobModifiers(livingEntity, false);
+                updateMobModifiers(livingEntity, overworld, false);
             }
         }
     }
 
-    private static void updateMobModifiers(LivingEntity livingEntity, boolean active) {
+    // Magnitude is recomputed per transition from the current moon phase: the config multipliers are
+    // now the Full-Moon ceiling, scaling linearly to 1.0 (no buff) at New Moon.
+    private static void updateMobModifiers(LivingEntity livingEntity, ServerLevel overworld, boolean active) {
+        int moonPhase = overworld.getMoonPhase();
+        double damageAmount = MoonPhases.scaledToFullMoonCeiling(Config.MOB_DAMAGE_MULTIPLIER.get(), moonPhase) - 1.0D;
+        double healthAmount = MoonPhases.scaledToFullMoonCeiling(Config.MOB_HEALTH_MULTIPLIER.get(), moonPhase) - 1.0D;
+
         AttributeInstance damage = livingEntity.getAttribute(Attributes.ATTACK_DAMAGE);
         if (damage != null) {
             if (active) {
-                damage.addOrUpdateTransientModifier(new AttributeModifier(MOB_DAMAGE_MODIFIER_ID, Config.MOB_DAMAGE_MULTIPLIER.get() - 1.0D, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+                damage.addOrUpdateTransientModifier(new AttributeModifier(MOB_DAMAGE_MODIFIER_ID, damageAmount, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
             } else {
                 damage.removeModifier(MOB_DAMAGE_MODIFIER_ID);
             }
@@ -254,7 +285,7 @@ public final class BloodMoonEvents {
         AttributeInstance health = livingEntity.getAttribute(Attributes.MAX_HEALTH);
         if (health != null) {
             if (active) {
-                health.addOrUpdateTransientModifier(new AttributeModifier(MOB_HEALTH_MODIFIER_ID, Config.MOB_HEALTH_MULTIPLIER.get() - 1.0D, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
+                health.addOrUpdateTransientModifier(new AttributeModifier(MOB_HEALTH_MODIFIER_ID, healthAmount, AttributeModifier.Operation.ADD_MULTIPLIED_BASE));
             } else {
                 health.removeModifier(MOB_HEALTH_MODIFIER_ID);
             }
@@ -277,7 +308,10 @@ public final class BloodMoonEvents {
         int refreshInterval = Config.EFFECT_REFRESH_INTERVAL_TICKS.get();
         int effectDuration = refreshInterval + EFFECT_REFRESH_FUDGE_TICKS;
         int moonPhase = overworld.getMoonPhase();
-        player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, effectDuration, Config.getWeaknessAmplifierForPhase(moonPhase)));
+        int weaknessAmplifier = Config.getWeaknessAmplifierForPhase(moonPhase);
+        Apolinumarise.LOGGER.debug("Blood Moon Weakness: moonPhase={} -> amplifier={} (Weakness {}) for {}.",
+                moonPhase, weaknessAmplifier, weaknessAmplifier + 1, player.getName().getString());
+        applyWeakness(player, effectDuration, weaknessAmplifier);
 
         int moonFullness = MoonPhases.fullnessPercent(moonPhase);
         if (moonFullness >= Config.MINING_FATIGUE_THRESHOLD_1.get()) {
@@ -291,8 +325,22 @@ public final class BloodMoonEvents {
         }
     }
 
+    // Vanilla addEffect only ever UPGRADES an active effect, so when the moon-phase amplifier drops
+    // below a still-active Weakness it would be ignored and the player would stay over-weakened.
+    // Remove first only when the amplifier actually has to change (at most once per Blood Moon), so
+    // the effect always tracks the current phase without a per-refresh remove/re-add flicker.
+    private static void applyWeakness(Player player, int duration, int amplifier) {
+        MobEffectInstance existing = player.getEffect(MobEffects.WEAKNESS);
+        if (existing != null && existing.getAmplifier() != amplifier) {
+            player.removeEffect(MobEffects.WEAKNESS);
+        }
+        player.addEffect(new MobEffectInstance(MobEffects.WEAKNESS, duration, amplifier));
+    }
+
+    // Infected players are no longer susceptible to Blood Moon debuffs. Incubating players still are
+    // (they look and act normal by design).
     private static boolean isSusceptible(Player player) {
-        return true;
+        return !InfectionLogic.isInfected(player);
     }
 
     private static double clampChance(double chance) {

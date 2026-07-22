@@ -25,4 +25,13 @@ public final class MoonPhases {
     public static double fullnessMultiplier(int moonPhase) {
         return 1.0D + fullnessPercent(moonPhase) / 100.0D;
     }
+
+    /**
+     * Interpolates a multiplier whose {@code fullMoonValue} ceiling applies at Full Moon and scales
+     * linearly down to 1.0 (no effect) at New Moon: {@code 1 + (fullMoonValue - 1) * fullness/100}.
+     * With a 1.2 ceiling: 1.0x at New Moon, 1.1x at half-full, 1.2x at Full Moon.
+     */
+    public static double scaledToFullMoonCeiling(double fullMoonValue, int moonPhase) {
+        return 1.0D + (fullMoonValue - 1.0D) * (fullnessPercent(moonPhase) / 100.0D);
+    }
 }

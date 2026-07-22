@@ -42,6 +42,16 @@ public class ShrineStructurePlacement extends RandomSpreadStructurePlacement {
         if (!super.isPlacementChunk(structureState, x, z)) {
             return false;
         }
+
+        boolean generationUnlocked = ShrineGenerationState.isGenerationUnlocked();
+        // Activation-gated worlds: nothing generates until /shrine activate flips the flag.
+        if (Config.SHRINE_REQUIRE_ACTIVATION_COMMAND.get() && !generationUnlocked) {
+            return false;
+        }
+        // Once activated (in any config), the origin-distance exclusion is bypassed entirely.
+        if (generationUnlocked) {
+            return true;
+        }
         if (!Config.SHRINE_SPAWN_EXCLUSION_ENABLED.get()) {
             return true;
         }

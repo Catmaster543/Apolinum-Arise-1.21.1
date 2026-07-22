@@ -26,6 +26,11 @@ public class Config {
                     "A candidate is rejected when abs(x) < distance AND abs(z) < distance. Read live during worldgen.")
             .defineInRange("shrineSpawnExclusionDistance", 3000, 0, 30_000_000);
 
+    public static final ModConfigSpec.BooleanValue SHRINE_REQUIRE_ACTIVATION_COMMAND = BUILDER
+            .comment("When true, shrines generate NOWHERE until '/shrine activate' flips the persisted world flag.",
+                    "Once activated, the origin-distance exclusion above is also bypassed. Affects only newly generated chunks.")
+            .define("shrineRequireActivationCommand", false);
+
     // --- Blood Moon cycle (Phase 3) ---
 
     public static final ModConfigSpec.DoubleValue BLOOD_MOON_BASE_CHANCE = BUILDER
@@ -41,11 +46,13 @@ public class Config {
             .defineInRange("bloodMoonChanceCap", 1.0D, 0.0D, 1.0D);
 
     public static final ModConfigSpec.DoubleValue MOB_DAMAGE_MULTIPLIER = BUILDER
-            .comment("Damage multiplier applied to hostile mobs while Blood Moon is active.")
+            .comment("Hostile-mob damage multiplier AT FULL MOON. Scales linearly with moon fullness down to 1.0",
+                    "(no buff) at New Moon: multiplier(phase) = 1 + (this - 1) * fullness(phase)/100.")
             .defineInRange("mobDamageMultiplier", 1.2D, 0.0D, 100.0D);
 
     public static final ModConfigSpec.DoubleValue MOB_HEALTH_MULTIPLIER = BUILDER
-            .comment("Max-health multiplier applied to hostile mobs while Blood Moon is active.")
+            .comment("Hostile-mob max-health multiplier AT FULL MOON. Scales linearly with moon fullness down to 1.0",
+                    "(no buff) at New Moon: multiplier(phase) = 1 + (this - 1) * fullness(phase)/100.")
             .defineInRange("mobHealthMultiplier", 1.2D, 0.0D, 100.0D);
 
     public static final ModConfigSpec.IntValue EFFECT_REFRESH_INTERVAL_TICKS = BUILDER
@@ -124,6 +131,16 @@ public class Config {
     public static final ModConfigSpec.IntValue MOSQUITO_UNDERGROUND_SPAWN_WEIGHT_PERCENT = BUILDER
             .comment("Percent of spawn attempts that target underground (cave) locations instead of the surface.")
             .defineInRange("mosquitoUndergroundSpawnWeightPercent", 15, 0, 100);
+
+    // --- Infection (Patch 2) ---
+
+    public static final ModConfigSpec.DoubleValue INFECTION_CHANCE_PER_BITE = BUILDER
+            .comment("Chance, per successful mosquito bite, that a not-yet-incubating/infected player begins incubating.")
+            .defineInRange("infectionChancePerBite", 0.10D, 0.0D, 1.0D);
+
+    public static final ModConfigSpec.IntValue INFECTION_INCUBATION_DAYS = BUILDER
+            .comment("Whole in-game days after the incubation roll before the player becomes fully infected.")
+            .defineInRange("infectionIncubationDays", 10, 0, 1_000_000);
 
     // --- Blood Moon awakening event (Phase 2) ---
 
