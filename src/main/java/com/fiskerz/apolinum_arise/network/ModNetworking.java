@@ -14,5 +14,13 @@ public final class ModNetworking {
                 (payload, context) -> AwakeningSoundClientHandler.handle(payload, context));
         registrar.playToClient(BloodMoonSyncPayload.TYPE, BloodMoonSyncPayload.STREAM_CODEC,
             (payload, context) -> BloodMoonClientHandler.handle(payload, context));
+        registrar.playToClient(MoleSyncPayload.TYPE, MoleSyncPayload.STREAM_CODEC,
+            (payload, context) -> MoleClientHandler.handle(payload, context));
+        // Client -> server: infected player requesting their (server-enforced) restricted inventory.
+        registrar.playToServer(OpenRestrictedInventoryPayload.TYPE, OpenRestrictedInventoryPayload.STREAM_CODEC,
+            OpenRestrictedInventoryHandler::handle);
+        // Client -> server: hold-to-revive channel input (target entity id, or -1 to break the channel).
+        registrar.playToServer(DownedReviveInputPayload.TYPE, DownedReviveInputPayload.STREAM_CODEC,
+            DownedReviveInputHandler::handle);
     }
 }

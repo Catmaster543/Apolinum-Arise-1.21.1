@@ -139,8 +139,9 @@ public class Config {
             .defineInRange("infectionChancePerBite", 0.10D, 0.0D, 1.0D);
 
     public static final ModConfigSpec.IntValue INFECTION_INCUBATION_DAYS = BUILDER
-            .comment("Whole in-game days after the incubation roll before the player becomes fully infected.")
-            .defineInRange("infectionIncubationDays", 10, 0, 1_000_000);
+            .comment("Number of incubation days; the player becomes fully infected at the moonrise of this day",
+                    "(day N = N-1 day-counts after the bite, so N=10 completes at day-10 moonrise).")
+            .defineInRange("infectionIncubationDays", 10, 1, 1_000_000);
 
     // --- Blood Moon awakening event (Phase 2) ---
 
@@ -179,6 +180,160 @@ public class Config {
     public static final ModConfigSpec.DoubleValue SOUND_MIN_VOLUME = BUILDER
             .comment("Floor volume of the awakening broadcast sound; heard at any distance and from other dimensions.")
             .defineInRange("soundMinVolume", 0.15, 0.0, 1.0);
+
+    // --- Infection symptom timeline (Phase 5): everything below applies ONLY while incubating ---
+
+    // Days 1-2 shared early-symptom roller. interval x chance over the ~2-day window averages ~2 hits
+    // (48000-tick window / 1200 = 40 attempts x 0.05 = 2.0 expected; natural variance is intended).
+    public static final ModConfigSpec.IntValue SYMPTOM_EARLY_ROLL_INTERVAL_TICKS = BUILDER
+            .comment("Days 1-2: ticks between early-symptom roll attempts.")
+            .defineInRange("symptomEarlyRollIntervalTicks", 1200, 1, 1_000_000);
+
+    public static final ModConfigSpec.DoubleValue SYMPTOM_EARLY_ROLL_CHANCE = BUILDER
+            .comment("Days 1-2: success chance per roll attempt. Tuned with the interval so the full window averages ~2 hits.")
+            .defineInRange("symptomEarlyRollChance", 0.05D, 0.0D, 1.0D);
+
+    public static final ModConfigSpec.IntValue SYMPTOM_EARLY_DURATION_TICKS = BUILDER
+            .comment("Days 1-2: fixed duration (ticks) of each early symptom (Nausea/Weakness/Mining Fatigue, equal weight). Default 100 = 5s.")
+            .defineInRange("symptomEarlyDurationTicks", 100, 1, 1_000_000);
+
+    // Days 3-10 main random-effect pool.
+    public static final ModConfigSpec.IntValue SYMPTOM_POOL_INTERVAL_TICKS = BUILDER
+            .comment("Days 3+: ticks between main-pool roll attempts.")
+            .defineInRange("symptomPoolIntervalTicks", 600, 1, 1_000_000);
+
+    public static final ModConfigSpec.DoubleValue SYMPTOM_POOL_BASE_CHANCE = BUILDER
+            .comment("Days 3+: base success chance per main-pool roll attempt (doubled from day 7 by symptomPoolDay7ChanceMultiplier).")
+            .defineInRange("symptomPoolBaseChance", 0.35D, 0.0D, 1.0D);
+
+    public static final ModConfigSpec.DoubleValue SYMPTOM_POOL_BASE_WEIGHT = BUILDER
+            .comment("Days 3+: selection weight of each common pool effect (Nausea, Weakness, Mining Fatigue, Blindness).")
+            .defineInRange("symptomPoolBaseWeight", 1.0D, 0.0D, 1000.0D);
+
+    public static final ModConfigSpec.DoubleValue SYMPTOM_POOL_POISON_WEIGHT = BUILDER
+            .comment("Days 3+: selection weight of Poison in the pool (lower than the common effects).")
+            .defineInRange("symptomPoolPoisonWeight", 0.3D, 0.0D, 1000.0D);
+
+    public static final ModConfigSpec.DoubleValue SYMPTOM_POOL_HUNGER_WEIGHT = BUILDER
+            .comment("Days 4+: selection weight of Hunger in the pool (similar to Poison's).")
+            .defineInRange("symptomPoolHungerWeight", 0.3D, 0.0D, 1000.0D);
+
+    public static final ModConfigSpec.IntValue SYMPTOM_POOL_MIN_DURATION_TICKS = BUILDER
+            .comment("Days 3+: minimum rolled effect duration (ticks). Default 60 = 3s.")
+            .defineInRange("symptomPoolMinDurationTicks", 60, 1, 1_000_000);
+
+    public static final ModConfigSpec.IntValue SYMPTOM_POOL_MAX_DURATION_TICKS = BUILDER
+            .comment("Days 3+: maximum rolled effect duration (ticks). Default 600 = 30s.")
+            .defineInRange("symptomPoolMaxDurationTicks", 600, 1, 1_000_000);
+
+    public static final ModConfigSpec.DoubleValue SYMPTOM_POOL_HUNGER_DURATION_MULTIPLIER = BUILDER
+            .comment("Days 4+: when Hunger is the rolled pool effect, its applied duration is the rolled value times this (only Hunger).")
+            .defineInRange("symptomPoolHungerDurationMultiplier", 3.0D, 0.0D, 1000.0D);
+
+    public static final ModConfigSpec.DoubleValue SYMPTOM_POOL_DAY7_CHANCE_MULTIPLIER = BUILDER
+            .comment("Days 7+: multiplier applied to the main-pool per-attempt chance.")
+            .defineInRange("symptomPoolDay7ChanceMultiplier", 2.0D, 0.0D, 1000.0D);
+
+    // Sun-exposure effects (days 5+). Exposure reuses vanilla's undead sun-burn conditions
+    // (isDay + high sky light + can-see-sky + not in water/rain/powder-snow), minus the burn-chance roll.
+    public static final ModConfigSpec.IntValue SYMPTOM_REFRESH_INTERVAL_TICKS = BUILDER
+            .comment("How often (ticks) continuous symptom effects (sun exposure, constant Hunger) are refreshed.")
+            .defineInRange("symptomRefreshIntervalTicks", 40, 1, 1_000_000);
+
+    public static final ModConfigSpec.IntValue SYMPTOM_SUN_WEAKNESS_BASE_AMPLIFIER = BUILDER
+            .comment("Day 5+: base Weakness amplifier applied while in sunlight (day 5 uses this).")
+            .defineInRange("symptomSunWeaknessBaseAmplifier", 0, 0, 255);
+
+    public static final ModConfigSpec.IntValue SYMPTOM_SUN_WEAKNESS_PER_DAY_INCREMENT = BUILDER
+            .comment("Day 5+: added to the sun Weakness amplifier per day past day 5. So day5=I, day6=II, ... day10=VI by default.")
+            .defineInRange("symptomSunWeaknessPerDayIncrement", 1, 0, 255);
+
+    public static final ModConfigSpec.IntValue SYMPTOM_SUN_MINING_FATIGUE_AMPLIFIER = BUILDER
+            .comment("Day 8+: flat Mining Fatigue amplifier applied while in sunlight, alongside the escalating Weakness.")
+            .defineInRange("symptomSunMiningFatigueAmplifier", 0, 0, 255);
+
+    public static final ModConfigSpec.IntValue SYMPTOM_SUN_BLINDNESS_THRESHOLD_SECONDS = BUILDER
+            .comment("Days 8-9: seconds of unbroken sun exposure after which Blindness is also applied while exposure continues.")
+            .defineInRange("symptomSunBlindnessThresholdSeconds", 60, 1, 1_000_000);
+
+    public static final ModConfigSpec.IntValue SYMPTOM_SUN_BLINDNESS_THRESHOLD_SECONDS_DAY10 = BUILDER
+            .comment("Day 10: replaces the day-8 threshold; at this many seconds of unbroken exposure BOTH Blindness and Wither apply.")
+            .defineInRange("symptomSunBlindnessThresholdSecondsDay10", 30, 1, 1_000_000);
+
+    public static final ModConfigSpec.IntValue SYMPTOM_SUN_WITHER_AMPLIFIER = BUILDER
+            .comment("Day 10: Wither amplifier applied at the exposure threshold (0 = Wither I).")
+            .defineInRange("symptomSunWitherAmplifier", 0, 0, 255);
+
+    // Moles.
+    public static final ModConfigSpec.ConfigValue<List<? extends Double>> MOLE_CHANCE_PER_DAY = BUILDER
+            .comment("Per-day chance to grow a new mole, indexed day 6..day 10 (5 entries). Days 1-5 never grow moles.")
+            .defineList("moleChancePerDay", () -> List.of(0.75D, 0.5D, 0.5D, 0.5D, 0.7D),
+                    value -> value instanceof Double chance && chance >= 0.0D && chance <= 1.0D);
+
+    public static final ModConfigSpec.DoubleValue MOLE_BASE_SIZE_MIN = BUILDER
+            .comment("Minimum random original/base size of a new mole, in player-model pixels.")
+            .defineInRange("moleBaseSizeMin", 0.6D, 0.01D, 16.0D);
+
+    public static final ModConfigSpec.DoubleValue MOLE_BASE_SIZE_MAX = BUILDER
+            .comment("Maximum random original/base size of a new mole, in player-model pixels.")
+            .defineInRange("moleBaseSizeMax", 1.0D, 0.01D, 16.0D);
+
+    public static final ModConfigSpec.DoubleValue MOLE_DAILY_GROWTH_INCREMENT = BUILDER
+            .comment("Base size a mole gains each day since creation, before the daily random multiplier.")
+            .defineInRange("moleDailyGrowthIncrement", 0.15D, 0.0D, 16.0D);
+
+    public static final ModConfigSpec.DoubleValue MOLE_GROWTH_MULTIPLIER_MIN = BUILDER
+            .comment("Low end of the per-day random growth multiplier rolled fresh for each mole each day.")
+            .defineInRange("moleGrowthMultiplierMin", 1.0D, 0.0D, 100.0D);
+
+    public static final ModConfigSpec.DoubleValue MOLE_GROWTH_MULTIPLIER_MAX = BUILDER
+            .comment("High end of the per-day random growth multiplier rolled fresh for each mole each day.")
+            .defineInRange("moleGrowthMultiplierMax", 2.0D, 0.0D, 100.0D);
+
+    public static final ModConfigSpec.DoubleValue MOLE_CAP_MULTIPLIER_MIN = BUILDER
+            .comment("Low end of a mole's cap multiplier, rolled once at creation. Cap = base size x this..max (default 3.0 +/- 0.7).")
+            .defineInRange("moleCapMultiplierMin", 2.3D, 0.0D, 100.0D);
+
+    public static final ModConfigSpec.DoubleValue MOLE_CAP_MULTIPLIER_MAX = BUILDER
+            .comment("High end of a mole's cap multiplier, rolled once at creation.")
+            .defineInRange("moleCapMultiplierMax", 3.7D, 0.0D, 100.0D);
+
+    public static final ModConfigSpec.DoubleValue MOLE_DAY10_SIZE_MULTIPLIER = BUILDER
+            .comment("Day 10 mole only: multiplies its base (starting) size, since it has no meaningful time to grow before moonrise.")
+            .defineInRange("moleDay10SizeMultiplier", 2.0D, 0.0D, 100.0D);
+
+    // --- Downed / revive system (Phase 7): replaces player death with a timed downed state ---
+
+    public static final ModConfigSpec.BooleanValue DOWNED_ENABLED = BUILDER
+            .comment("Master toggle for the downed/revive system. When false, players die normally.")
+            .define("downedEnabled", true);
+
+    public static final ModConfigSpec.IntValue DOWNED_DURATION_SECONDS = BUILDER
+            .comment("How long (seconds) a downed player has before they actually die, if not revived.")
+            .defineInRange("downedDurationSeconds", 60, 1, 100_000);
+
+    public static final ModConfigSpec.DoubleValue DOWNED_HEALTH_FLOOR = BUILDER
+            .comment("Health a downed player is clamped to (kept alive at) for the whole downed state.")
+            .defineInRange("downedHealthFloor", 1.0D, 0.5D, 1024.0D);
+
+    public static final ModConfigSpec.DoubleValue REVIVE_RANGE = BUILDER
+            .comment("Maximum distance (blocks) at which a downed player can be revived.")
+            .defineInRange("reviveRange", 3.0D, 0.5D, 64.0D);
+
+    public static final ModConfigSpec.DoubleValue REVIVE_HOLD_SECONDS = BUILDER
+            .comment("Seconds the revive key must be held continuously to complete a revive.")
+            .defineInRange("reviveHoldSeconds", 5.0D, 0.1D, 3600.0D);
+
+    public static final ModConfigSpec.DoubleValue REVIVE_HEALTH_ON_REVIVE = BUILDER
+            .comment("Health a revived player is restored to (2.0 = one heart).")
+            .defineInRange("reviveHealthOnRevive", 2.0D, 0.5D, 1024.0D);
+
+    /** Per-day mole chance for a symptom day number (6..10); returns 0 for days 1-5 or out-of-range. */
+    public static double getMoleChanceForDay(int dayNumber) {
+        List<? extends Double> table = MOLE_CHANCE_PER_DAY.get();
+        int index = dayNumber - 6;
+        return index >= 0 && index < table.size() ? table.get(index) : 0.0D;
+    }
 
     public static int getWeaknessAmplifierForPhase(int moonPhase) {
         List<? extends Integer> table = WEAKNESS_AMPLIFIER_BY_PHASE.get();

@@ -7,6 +7,12 @@ import com.mojang.logging.LogUtils;
 import com.fiskerz.apolinum_arise.bloodmoon.BloodMoonRegistry;
 import com.fiskerz.apolinum_arise.bloodmoon.BloodMoonEvents;
 import com.fiskerz.apolinum_arise.config.Config;
+import com.fiskerz.apolinum_arise.downed.DownedAttachments;
+import com.fiskerz.apolinum_arise.downed.DownedEvents;
+import com.fiskerz.apolinum_arise.infection.InfectionAttachments;
+import com.fiskerz.apolinum_arise.infection.InfectionEvents;
+import com.fiskerz.apolinum_arise.infection.InfectionMenus;
+import com.fiskerz.apolinum_arise.infection.SymptomAttachments;
 import com.fiskerz.apolinum_arise.mosquito.MosquitoEntity;
 import com.fiskerz.apolinum_arise.network.ModNetworking;
 
@@ -35,7 +41,10 @@ public class Apolinumarise {
     // FML will recognize some parameter types like IEventBus or ModContainer and pass them in automatically.
     public Apolinumarise(IEventBus modEventBus, ModContainer modContainer) {
         BloodMoonRegistry.register(modEventBus);
-        com.fiskerz.apolinum_arise.infection.InfectionAttachments.register(modEventBus);
+        InfectionAttachments.register(modEventBus);
+        SymptomAttachments.register(modEventBus);
+        InfectionMenus.register(modEventBus);
+        DownedAttachments.register(modEventBus);
         modEventBus.addListener(ModNetworking::register);
         modEventBus.addListener(Apolinumarise::addCreative);
         modEventBus.addListener(Apolinumarise::onEntityAttributeCreation);
@@ -48,6 +57,28 @@ public class Apolinumarise {
         NeoForge.EVENT_BUS.addListener(Apolinumarise::onPlayerChangedDimension);
         NeoForge.EVENT_BUS.addListener(Apolinumarise::onRegisterCommands);
         NeoForge.EVENT_BUS.addListener(Apolinumarise::onLevelLoad);
+
+        // Phase 5 infection symptom timeline (its own listeners; Phase 3/4 files untouched).
+        NeoForge.EVENT_BUS.addListener(InfectionEvents::onServerTick);
+        NeoForge.EVENT_BUS.addListener(InfectionEvents::onStartTracking);
+        NeoForge.EVENT_BUS.addListener(InfectionEvents::onPlayerLoggedIn);
+        NeoForge.EVENT_BUS.addListener(InfectionEvents::onPlayerLoggedOut);
+        NeoForge.EVENT_BUS.addListener(InfectionEvents::onRegisterCommands);
+        NeoForge.EVENT_BUS.addListener(InfectionEvents::onLivingChangeTarget);
+        NeoForge.EVENT_BUS.addListener(InfectionEvents::onRightClickItem);
+        NeoForge.EVENT_BUS.addListener(InfectionEvents::onItemPickup);
+
+        // Phase 7 downed/revive system (server-side listeners).
+        NeoForge.EVENT_BUS.addListener(DownedEvents::onServerTick);
+        NeoForge.EVENT_BUS.addListener(DownedEvents::onLivingDeath);
+        NeoForge.EVENT_BUS.addListener(DownedEvents::onLivingDamagePost);
+        NeoForge.EVENT_BUS.addListener(DownedEvents::onLivingChangeTarget);
+        NeoForge.EVENT_BUS.addListener(DownedEvents::onAttackEntity);
+        NeoForge.EVENT_BUS.addListener(DownedEvents::onRightClickBlock);
+        NeoForge.EVENT_BUS.addListener(DownedEvents::onRightClickItem);
+        NeoForge.EVENT_BUS.addListener(DownedEvents::onEntityInteract);
+        NeoForge.EVENT_BUS.addListener(DownedEvents::onLeftClickBlock);
+        NeoForge.EVENT_BUS.addListener(DownedEvents::onBlockBreak);
 
         // SERVER config: per-world, admin-controlled (see config.Config)
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SPEC);

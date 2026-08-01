@@ -48,13 +48,13 @@ public class InfectionGameTests {
                         && player.getData(InfectionAttachments.INFECTION).infectionStartDay() == startDay,
                 "Bite while incubating must not re-roll");
 
-        // Before the window elapses: stays incubating.
-        InfectionLogic.promoteIfDue(player, startDay + incubation - 1);
+        // Before the window (day N-1 moonrise, delta incubation-2): stays incubating.
+        InfectionLogic.promoteIfDue(player, startDay + incubation - 2);
         helper.assertTrue(player.getData(InfectionAttachments.INFECTION).incubating(), "still incubating before window");
         helper.assertFalse(player.getData(InfectionAttachments.INFECTION).infected(), "not infected before window");
 
-        // At the window: becomes infected, no longer incubating.
-        InfectionLogic.promoteIfDue(player, startDay + incubation);
+        // At day-N moonrise (delta incubation-1, Phase 6 A2): becomes infected, no longer incubating.
+        InfectionLogic.promoteIfDue(player, startDay + incubation - 1);
         helper.assertFalse(player.getData(InfectionAttachments.INFECTION).incubating(), "no longer incubating");
         helper.assertTrue(player.getData(InfectionAttachments.INFECTION).infected(), "now infected");
 

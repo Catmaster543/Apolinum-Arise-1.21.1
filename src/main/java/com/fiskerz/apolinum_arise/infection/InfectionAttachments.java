@@ -16,9 +16,12 @@ public final class InfectionAttachments {
             DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, Apolinumarise.MODID);
 
     // serialize(CODEC) persists across relog; copyOnDeath() keeps it through death/respawn.
+    // sync(..., self-only) mirrors the state to the OWNING client (Phase 6): the client-side inventory
+    // interception needs to know isInfected, but infection stays private to that player (not broadcast).
     public static final Supplier<AttachmentType<InfectionData>> INFECTION = ATTACHMENT_TYPES.register("infection",
             () -> AttachmentType.builder(() -> InfectionData.NONE)
                     .serialize(InfectionData.CODEC)
+                    .sync((holder, receiver) -> holder == receiver, InfectionData.STREAM_CODEC)
                     .copyOnDeath()
                     .build());
 

@@ -29,7 +29,9 @@ public final class InfectionLogic {
         if (level.getRandom().nextDouble() < Config.INFECTION_CHANCE_PER_BITE.get()) {
             int day = currentDay(level);
             player.setData(InfectionAttachments.INFECTION, data.beginIncubating(day));
-            Apolinumarise.LOGGER.debug("Infection: {} began incubating on day {}.", player.getGameProfile().getName(), day);
+            // [Phase 6 A2 diagnostics] record exactly what start-day and time-of-day the bite lands on.
+            Apolinumarise.LOGGER.info("[InfectionDay] BITE {} startDay={} rawDayTime={} timeOfDay={} (night={})",
+                    player.getGameProfile().getName(), day, level.getDayTime(), level.getDayTime() % Level.TICKS_PER_DAY, level.isNight());
         }
     }
 
@@ -39,6 +41,9 @@ public final class InfectionLogic {
      */
     public static void onDuskTransition(ServerLevel overworld) {
         int day = currentDay(overworld);
+        // [Phase 6 A2 diagnostics] the exact tick/day this dusk boundary is evaluated against.
+        Apolinumarise.LOGGER.info("[InfectionDay] DUSK-CHECK currentDay={} rawDayTime={} timeOfDay={} night={}",
+                day, overworld.getDayTime(), overworld.getDayTime() % Level.TICKS_PER_DAY, overworld.isNight());
         for (ServerPlayer player : overworld.getServer().getPlayerList().getPlayers()) {
             promoteIfDue(player, day);
         }
@@ -52,9 +57,24 @@ public final class InfectionLogic {
     // Package-visible for gametests (which use mock Players).
     static void promoteIfDue(Player player, int currentDay) {
         InfectionData data = player.getData(InfectionAttachments.INFECTION);
-        if (data.incubating() && currentDay - data.infectionStartDay() >= Config.INFECTION_INCUBATION_DAYS.get()) {
+        if (!data.incubating()) {
+            return;
+        }
+        int delta = currentDay - data.infectionStartDay();
+        int incubationDays = Config.INFECTION_INCUBATION_DAYS.get();
+        // Phase 6 A2 fix. Root cause (see [InfectionDay] logs): the previous condition `delta >= incubationDays`
+        // completed incubation at delta == incubationDays, i.e. dayNumber incubationDays+1 - one moonrise
+        // too late (day 11 for a 10-day incubation). The intended point is the moonrise of day N itself,
+        // where day N = dayNumber == incubationDays == delta+1, i.e. delta == incubationDays-1.
+        boolean due = delta >= Math.max(0, incubationDays - 1);
+        // [Phase 6 A2 diagnostics] the actual day-count delta at every check and the threshold it compares
+        // against, so the fix is observed in logs rather than guessed.
+        Apolinumarise.LOGGER.info("[InfectionDay] CHECK {} startDay={} currentDay={} delta={} incubationDays={} due={} (dayNumber={})",
+                player.getName().getString(), data.infectionStartDay(), currentDay, delta, incubationDays, due, delta + 1);
+        if (due) {
             player.setData(InfectionAttachments.INFECTION, data.becomeInfected());
-            Apolinumarise.LOGGER.debug("Infection: {} became fully infected on day {}.", player.getGameProfile().getName(), currentDay);
+            Apolinumarise.LOGGER.info("[InfectionDay] PROMOTE {} -> infected at currentDay={} delta={} (dayNumber={})",
+                    player.getName().getString(), currentDay, delta, delta + 1);
         }
     }
 

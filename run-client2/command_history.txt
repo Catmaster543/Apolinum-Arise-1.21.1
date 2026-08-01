@@ -1,0 +1,8 @@
+/tp Dev2 Dev
+/kill Dev2
+/tp Dev2 Dev
+/kill Dev2
+/tp Dev2 Dev
+/infection set Dev infected
+/kill Dev
+/infection set Dev healthy

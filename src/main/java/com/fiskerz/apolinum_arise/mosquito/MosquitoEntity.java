@@ -6,6 +6,7 @@ import com.fiskerz.apolinum_arise.bloodmoon.BloodMoonRegistry;
 import com.fiskerz.apolinum_arise.bloodmoon.BloodMoonState;
 import com.fiskerz.apolinum_arise.config.Config;
 import com.fiskerz.apolinum_arise.infection.InfectionLogic;
+import com.fiskerz.apolinum_arise.infection.InfectionSymptoms;
 import com.fiskerz.apolinum_arise.util.MoonPhases;
 
 import net.minecraft.core.BlockPos;
@@ -85,7 +86,11 @@ public class MosquitoEntity extends Monster implements GeoEntity {
     protected void registerGoals() {
         this.goalSelector.addGoal(1, new MeleeAttackGoal(this, 1.2D, true));
         this.goalSelector.addGoal(3, new MosquitoWanderGoal(this));
-        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        // Explicit targeting exemption (Phase 6 B4): the mosquito must never acquire an infected /
+        // targeting-exempt player. Monster already implements Enemy, so the LivingChangeTargetEvent
+        // guard covers it too, but this predicate makes the mosquito's own targeting reject them up front.
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true,
+                target -> !(target instanceof Player targetPlayer && InfectionSymptoms.enemiesIgnore(targetPlayer))));
     }
 
     @Override
