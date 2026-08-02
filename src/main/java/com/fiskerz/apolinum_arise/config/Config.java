@@ -332,8 +332,13 @@ public class Config {
 
     public static final ModConfigSpec.DoubleValue BITE_BAR_FILL_RATE_PERCENT_PER_20SEC = BUILDER
             .comment("Percent the infected player's bite bar fills per 20 seconds while a fill contributor is active",
-                    "(darkness is the first contributor). At the default 1.0 the bar goes 0->100% in ~33 minutes of darkness.")
-            .defineInRange("biteBarFillRatePercentPer20Sec", 1.0D, 0.0D, 100.0D);
+                    "(darkness is the first contributor). At the default 1.5 the bar goes 0->100% in ~22 minutes of darkness.")
+            .defineInRange("biteBarFillRatePercentPer20Sec", 1.5D, 0.0D, 100.0D);
+
+    public static final ModConfigSpec.DoubleValue BITE_BAR_BLOOD_MOON_MULTIPLIER = BUILDER
+            .comment("Extra multiplier applied to the total bite-bar fill rate while a Blood Moon is active,",
+                    "on top of the base rate above. Default 2.0, so darkness + active Blood Moon = 1.5 x 2 = 3x the base rate.")
+            .defineInRange("biteBarBloodMoonMultiplier", 2.0D, 0.0D, 100.0D);
 
     public static final ModConfigSpec.IntValue BITE_BAR_DARKNESS_THRESHOLD = BUILDER
             .comment("The bite bar fills while the player's effective (time-of-day-adjusted) light level is AT OR BELOW this.",

@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.fiskerz.apolinum_arise.Apolinumarise;
 import com.fiskerz.apolinum_arise.bloodmoon.BloodMoonRegistry;
+import com.fiskerz.apolinum_arise.bloodmoon.BloodMoonState;
 import com.fiskerz.apolinum_arise.config.Config;
 import com.fiskerz.apolinum_arise.downed.DownedManager;
 
@@ -58,6 +59,11 @@ public final class BiteBar {
         float delta = 0.0F;
         for (FillContributor contributor : CONTRIBUTORS) {
             delta += Math.max(0.0F, contributor.perTick(player));
+        }
+        // A separately-tunable boost applied on top of the summed contributor rate while a Blood Moon
+        // is active (state anchored to the Overworld, so it holds regardless of the player's dimension).
+        if (delta > 0.0F && BloodMoonState.isActive(player.serverLevel())) {
+            delta *= (float) (double) Config.BITE_BAR_BLOOD_MOON_MULTIPLIER.get();
         }
         if (delta > 0.0F) {
             PENDING.merge(player.getUUID(), delta, Float::sum);

@@ -6,3 +6,4 @@
 /infection set Dev infected
 /kill Dev
 /infection set Dev healthy
+/kill Dev2

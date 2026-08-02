@@ -28,14 +28,14 @@ public final class BiteBarHud {
     private BiteBarHud() {}
 
     // assets/apolinumarise/textures/gui/bite_bar.png - 81 x 27, three stacked 81 x 9 strips:
-    //   v=0  empty/background, v=9  filled, v=18  ready (100%).
+    //   v=0  frame (border/decoration, transparent interior), v=9  filled, v=18  ready (100%) overlay.
     public static final ResourceLocation TEXTURE =
             ResourceLocation.fromNamespaceAndPath(Apolinumarise.MODID, "textures/gui/bite_bar.png");
     private static final int BAR_WIDTH = 81;
     private static final int STRIP_HEIGHT = 9;
     private static final int TEXTURE_WIDTH = 81;
     private static final int TEXTURE_HEIGHT = 27;
-    private static final int V_EMPTY = 0;
+    private static final int V_FRAME = 0;
     private static final int V_FILLED = 9;
     private static final int V_READY = 18;
 
@@ -68,15 +68,20 @@ public final class BiteBarHud {
         int rowsAboveFood = 1 + (isToughAsNailsLoaded() ? 1 : 0);
         int y = screenHeight - FOOD_ROW_FROM_BOTTOM - rowsAboveFood * ROW_HEIGHT;
 
-        // Background (empty strip), always full width. A missing texture renders as the placeholder here.
-        guiGraphics.blit(TEXTURE, x, y, 0.0F, (float) V_EMPTY, BAR_WIDTH, STRIP_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-
+        // Draw order: fill FIRST (underneath), then the frame on top. The frame's interior is transparent,
+        // so the fill shows through it while the frame's border/decoration still renders correctly above.
         int filledWidth = Math.round(BAR_WIDTH * percent / 100.0F);
         if (filledWidth > 0) {
-            // "ready" tint at full, otherwise the normal filled strip; both cropped to filledWidth from left.
-            int v = percent >= 100.0F ? V_READY : V_FILLED;
-            guiGraphics.blit(TEXTURE, x, y, 0.0F, (float) v, filledWidth, STRIP_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+            // The fill is drawn at every percentage including 100% (full width) - it is never hidden/swapped.
+            guiGraphics.blit(TEXTURE, x, y, 0.0F, (float) V_FILLED, filledWidth, STRIP_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
         }
+        if (percent >= 100.0F) {
+            // At full, the "ready" distinction layers ON TOP of the still-visible full bar - it does not
+            // replace it. It stays until an actual bite resets the bar to 0%.
+            guiGraphics.blit(TEXTURE, x, y, 0.0F, (float) V_READY, BAR_WIDTH, STRIP_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+        }
+        // Frame last, on top of the fill. A missing texture renders as the placeholder here.
+        guiGraphics.blit(TEXTURE, x, y, 0.0F, (float) V_FRAME, BAR_WIDTH, STRIP_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
     }
 
     private static boolean isToughAsNailsLoaded() {
