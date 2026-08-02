@@ -15,14 +15,20 @@ import net.minecraft.network.codec.StreamCodec;
  * freeze the downed player's hunger; they are server-only and left out of the network view. {@code bodyYaw}
  * is the body facing frozen the instant they went down, so the rendered corpse never tracks the look
  * direction (Patch B6).
+ *
+ * <p>{@code revivable} (= not fully infected) gates the revive; {@code healthy} (= clean: neither
+ * incubating nor infected) gates the Phase 8 player-to-player bite. Both are captured at down-time and
+ * broadcast, because infection state itself is synced only to its owner and a would-be reviver/biter's
+ * client otherwise couldn't tell.
  */
-public record DownedData(boolean downed, boolean revivable, int poseVariant, int durationTicks,
+public record DownedData(boolean downed, boolean revivable, boolean healthy, int poseVariant, int durationTicks,
                          long enteredGameTime, float bodyYaw, int savedFood, float savedSaturation) {
-    public static final DownedData NONE = new DownedData(false, false, 0, 0, 0L, 0.0F, 0, 0.0F);
+    public static final DownedData NONE = new DownedData(false, false, false, 0, 0, 0L, 0.0F, 0, 0.0F);
 
     public static final Codec<DownedData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.BOOL.optionalFieldOf("downed", false).forGetter(DownedData::downed),
             Codec.BOOL.optionalFieldOf("revivable", false).forGetter(DownedData::revivable),
+            Codec.BOOL.optionalFieldOf("healthy", false).forGetter(DownedData::healthy),
             Codec.INT.optionalFieldOf("poseVariant", 0).forGetter(DownedData::poseVariant),
             Codec.INT.optionalFieldOf("durationTicks", 0).forGetter(DownedData::durationTicks),
             Codec.LONG.optionalFieldOf("enteredGameTime", 0L).forGetter(DownedData::enteredGameTime),
@@ -31,18 +37,33 @@ public record DownedData(boolean downed, boolean revivable, int poseVariant, int
             Codec.FLOAT.optionalFieldOf("savedSaturation", 0.0F).forGetter(DownedData::savedSaturation)
     ).apply(instance, DownedData::new));
 
-    // Network view: everything a client needs to render + decide whether to show the revive indicator
-    // (downed + revivable + pose + fade timing + frozen body facing). Saved hunger is server-only.
-    // revivable is synced because infection state (which drives eligibility) is NOT broadcast to others.
-    public static final StreamCodec<ByteBuf, DownedData> STREAM_CODEC = StreamCodec.composite(
-            ByteBufCodecs.BOOL, DownedData::downed,
-            ByteBufCodecs.BOOL, DownedData::revivable,
-            ByteBufCodecs.VAR_INT, DownedData::poseVariant,
-            ByteBufCodecs.VAR_INT, DownedData::durationTicks,
-            ByteBufCodecs.VAR_LONG, DownedData::enteredGameTime,
-            ByteBufCodecs.FLOAT, DownedData::bodyYaw,
-            (downed, revivable, poseVariant, durationTicks, enteredGameTime, bodyYaw) ->
-                    new DownedData(downed, revivable, poseVariant, durationTicks, enteredGameTime, bodyYaw, 0, 0.0F));
+    // Network view: everything a client needs to render + decide whether to show the revive/bite indicator
+    // (downed + revivable + healthy + pose + fade timing + frozen body facing). Saved hunger is server-only.
+    // Hand-written rather than StreamCodec.composite because there are 7 synced fields (composite caps at 6).
+    public static final StreamCodec<ByteBuf, DownedData> STREAM_CODEC = new StreamCodec<>() {
+        @Override
+        public DownedData decode(ByteBuf buffer) {
+            boolean downed = ByteBufCodecs.BOOL.decode(buffer);
+            boolean revivable = ByteBufCodecs.BOOL.decode(buffer);
+            boolean healthy = ByteBufCodecs.BOOL.decode(buffer);
+            int poseVariant = ByteBufCodecs.VAR_INT.decode(buffer);
+            int durationTicks = ByteBufCodecs.VAR_INT.decode(buffer);
+            long enteredGameTime = ByteBufCodecs.VAR_LONG.decode(buffer);
+            float bodyYaw = ByteBufCodecs.FLOAT.decode(buffer);
+            return new DownedData(downed, revivable, healthy, poseVariant, durationTicks, enteredGameTime, bodyYaw, 0, 0.0F);
+        }
+
+        @Override
+        public void encode(ByteBuf buffer, DownedData value) {
+            ByteBufCodecs.BOOL.encode(buffer, value.downed());
+            ByteBufCodecs.BOOL.encode(buffer, value.revivable());
+            ByteBufCodecs.BOOL.encode(buffer, value.healthy());
+            ByteBufCodecs.VAR_INT.encode(buffer, value.poseVariant());
+            ByteBufCodecs.VAR_INT.encode(buffer, value.durationTicks());
+            ByteBufCodecs.VAR_LONG.encode(buffer, value.enteredGameTime());
+            ByteBufCodecs.FLOAT.encode(buffer, value.bodyYaw());
+        }
+    };
 
     /** Fraction of the downed timer elapsed at the given game time, clamped to [0,1] (for the fade). */
     public float progress(long gameTime) {

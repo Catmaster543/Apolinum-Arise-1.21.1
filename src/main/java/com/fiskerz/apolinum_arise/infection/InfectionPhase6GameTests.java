@@ -85,7 +85,7 @@ public class InfectionPhase6GameTests {
     @GameTest(template = "empty_3x3", batch = "infection")
     public static void infected_players_are_targeting_exempt(GameTestHelper helper) {
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
-        player.setData(InfectionAttachments.INFECTION, new InfectionData(false, 0, true));
+        player.setData(InfectionAttachments.INFECTION, new InfectionData(false, 0, true, 0.0F));
         helper.assertTrue(InfectionSymptoms.enemiesIgnore(player), "an infected player is targeting-exempt");
 
         // A hostile mob's target change to the infected player is redirected to null by the handler.

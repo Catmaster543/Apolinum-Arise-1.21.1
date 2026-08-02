@@ -27,12 +27,26 @@ public final class InfectionLogic {
             return; // already in the state machine: no re-roll, no effect
         }
         if (level.getRandom().nextDouble() < Config.INFECTION_CHANCE_PER_BITE.get()) {
-            int day = currentDay(level);
-            player.setData(InfectionAttachments.INFECTION, data.beginIncubating(day));
-            // [Phase 6 A2 diagnostics] record exactly what start-day and time-of-day the bite lands on.
-            Apolinumarise.LOGGER.info("[InfectionDay] BITE {} startDay={} rawDayTime={} timeOfDay={} (night={})",
-                    player.getGameProfile().getName(), day, level.getDayTime(), level.getDayTime() % Level.TICKS_PER_DAY, level.isNight());
+            startIncubation(player, level);
         }
+    }
+
+    /**
+     * Begins incubation for a clean player, guarded so an already-incubating/infected player is untouched.
+     * This is the single infection-start path shared by the mosquito bite (Phase 4) and the Phase 8
+     * player-to-player bite - the roll that decides WHETHER to start lives in each caller, but the actual
+     * transition (start-day stamp, attachment write, diagnostics) is here so there is exactly one copy.
+     */
+    public static void startIncubation(Player player, ServerLevel level) {
+        InfectionData data = player.getData(InfectionAttachments.INFECTION);
+        if (data.incubating() || data.infected()) {
+            return;
+        }
+        int day = currentDay(level);
+        player.setData(InfectionAttachments.INFECTION, data.beginIncubating(day));
+        // [Phase 6 A2 diagnostics] record exactly what start-day and time-of-day the infection lands on.
+        Apolinumarise.LOGGER.info("[InfectionDay] BITE {} startDay={} rawDayTime={} timeOfDay={} (night={})",
+                player.getGameProfile().getName(), day, level.getDayTime(), level.getDayTime() % Level.TICKS_PER_DAY, level.isNight());
     }
 
     /**
@@ -80,5 +94,10 @@ public final class InfectionLogic {
 
     public static boolean isInfected(Player player) {
         return player.getData(InfectionAttachments.INFECTION).infected();
+    }
+
+    /** Clean = neither incubating nor infected. The only valid target state for a Phase 8 bite. */
+    public static boolean isHealthy(Player player) {
+        return player.getData(InfectionAttachments.INFECTION).healthy();
     }
 }

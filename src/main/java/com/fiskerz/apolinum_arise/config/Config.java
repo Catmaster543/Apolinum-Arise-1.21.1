@@ -328,6 +328,26 @@ public class Config {
             .comment("Health a revived player is restored to (2.0 = one heart).")
             .defineInRange("reviveHealthOnRevive", 2.0D, 0.5D, 1024.0D);
 
+    // --- Bite bar & player-to-player spread (Phase 8) ---
+
+    public static final ModConfigSpec.DoubleValue BITE_BAR_FILL_RATE_PERCENT_PER_20SEC = BUILDER
+            .comment("Percent the infected player's bite bar fills per 20 seconds while a fill contributor is active",
+                    "(darkness is the first contributor). At the default 1.0 the bar goes 0->100% in ~33 minutes of darkness.")
+            .defineInRange("biteBarFillRatePercentPer20Sec", 1.0D, 0.0D, 100.0D);
+
+    public static final ModConfigSpec.IntValue BITE_BAR_DARKNESS_THRESHOLD = BUILDER
+            .comment("The bite bar fills while the player's effective (time-of-day-adjusted) light level is AT OR BELOW this.",
+                    "Default 7 matches the darkness at which hostile mobs spawn. Uses getMaxLocalRawBrightness, not raw sky light.")
+            .defineInRange("biteBarDarknessThreshold", 7, 0, 15);
+
+    public static final ModConfigSpec.DoubleValue BITE_INFECTION_CHANCE = BUILDER
+            .comment("Chance a bite (by an infected player with a full bar, on a downed healthy target) starts the target's incubation.")
+            .defineInRange("biteInfectionChance", 0.20D, 0.0D, 1.0D);
+
+    public static final ModConfigSpec.DoubleValue BITE_RANGE = BUILDER
+            .comment("Maximum distance (blocks) at which an infected player can bite a downed healthy target.")
+            .defineInRange("biteRange", 3.0D, 0.5D, 64.0D);
+
     /** Per-day mole chance for a symptom day number (6..10); returns 0 for days 1-5 or out-of-range. */
     public static double getMoleChanceForDay(int dayNumber) {
         List<? extends Double> table = MOLE_CHANCE_PER_DAY.get();

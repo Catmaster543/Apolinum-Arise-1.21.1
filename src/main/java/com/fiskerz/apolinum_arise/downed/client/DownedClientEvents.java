@@ -5,10 +5,12 @@ import com.fiskerz.apolinum_arise.config.Config;
 import com.fiskerz.apolinum_arise.downed.DownedAttachments;
 import com.fiskerz.apolinum_arise.downed.DownedData;
 import com.fiskerz.apolinum_arise.downed.DownedManager;
+import com.fiskerz.apolinum_arise.infection.InfectionAttachments;
+import com.fiskerz.apolinum_arise.infection.InfectionLogic;
+import com.fiskerz.apolinum_arise.network.BiteAttemptPayload;
 import com.fiskerz.apolinum_arise.network.DownedReviveInputPayload;
 
 import net.minecraft.client.CameraType;
-import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.Input;
@@ -49,11 +51,17 @@ public final class DownedClientEvents {
     // Camera-preference save/restore.
     private static CameraType savedCameraType;
     private static boolean cameraForced;
-    // Client-side revive-channel tracking (for the indicator fill); the server is authoritative for the revive.
+    // Client-side revive-channel tracking; reviveTargetId is the target we are actively HOLDING toward (sent
+    // to the server), -1 when not holding. The server is authoritative for the revive itself.
     private static int reviveTargetId = -1;
     private static int reviveProgressTicks;
     // Edge-tracking for diagnostic logging (Patch B5): only log on key/target transitions, never per-tick.
     private static boolean reviveKeyWasDown;
+
+    // What the crosshair indicator should show this frame, computed each client tick and read at render.
+    // Decoupled from reviveTargetId so the revive prompt appears on AIM alone, before any hold begins.
+    private enum Indicator { NONE, REVIVE, BITE }
+    private static Indicator indicatorMode = Indicator.NONE;
 
     // ------------------------------------------------------------------ registration
 
@@ -89,10 +97,32 @@ public final class DownedClientEvents {
         updateCamera(minecraft, downed || DownedPoses.previewVariant() >= 0);
 
         if (downed) {
-            resetChannel(false); // a downed player can't revive
+            resetChannel(false); // a downed player can't revive or bite
+            clearIndicator();
+            drainClicks();
             return;
         }
-        tickReviveChannel(minecraft, player);
+        // The one revive key context-switches by the LOOKER's infection state, so there is never a
+        // conflict: an infected player bites (single press), everyone else revives (hold). They are
+        // mutually exclusive - an infected player is not revive-eligible, and biting requires infection.
+        if (InfectionLogic.isInfected(player)) {
+            resetChannel(false); // an infected player never holds a revive channel
+            tickBite(minecraft, player);
+        } else {
+            drainClicks(); // ignore stray bite presses queued while out of the bite context
+            tickReviveChannel(minecraft, player);
+        }
+    }
+
+    // Discard any queued key presses so a press only ever fires a fresh bite while in the bite context.
+    private static void drainClicks() {
+        while (DownedKeybinds.REVIVE.consumeClick()) {
+            // discard
+        }
+    }
+
+    private static void clearIndicator() {
+        indicatorMode = Indicator.NONE;
     }
 
     private static void updateCamera(Minecraft minecraft, boolean downed) {
@@ -113,36 +143,66 @@ public final class DownedClientEvents {
     }
 
     private static void tickReviveChannel(Minecraft minecraft, LocalPlayer player) {
-        // Link 1 (keybind press/hold/release): log only on the edge so the transcript shows the press
-        // without per-tick spam.
         boolean keyDown = DownedKeybinds.REVIVE.isDown();
         if (keyDown != reviveKeyWasDown) {
             Apolinumarise.LOGGER.debug("Revive: key {} (reviver eligible={}).",
                     keyDown ? "DOWN" : "UP", DownedManager.isEligible(player));
             reviveKeyWasDown = keyDown;
         }
-        if (!keyDown || !DownedManager.isEligible(player)) {
-            resetChannel(true);
-            return;
-        }
-        // Link 2 (target acquisition against the real hitbox).
-        Player target = pickReviveTarget(player);
+        // Target acquisition runs EVERY tick regardless of the key, against the real (upright) hitbox.
+        Player target = DownedManager.isEligible(player) ? pickReviveTarget(player) : null;
         if (target == null) {
             if (reviveTargetId != -1) {
-                Apolinumarise.LOGGER.debug("Revive: target lost (crosshair no longer on a downed player).");
+                PacketDistributor.sendToServer(new DownedReviveInputPayload(-1)); // drop any channel we had
             }
-            resetChannel(true);
+            reviveTargetId = -1;
+            reviveProgressTicks = 0;
+            clearIndicator();
             return;
         }
-        // Link 4 (dispatch to server every tick while held on a valid target).
-        PacketDistributor.sendToServer(new DownedReviveInputPayload(target.getId()));
-        if (reviveTargetId != target.getId()) {
-            Apolinumarise.LOGGER.debug("Revive: target acquired {} (id {}); indicator + hold timer starting.",
-                    target.getGameProfile().getName(), target.getId());
-            reviveTargetId = target.getId();
+        // BUGFIX: simply aiming at an eligible downed target shows the indicator, whether or not the key is
+        // held yet. The hold-progress fill is layered on top of that, not a precondition for it.
+        indicatorMode = Indicator.REVIVE;
+        if (keyDown) {
+            // Dispatch to the server every tick while held on a valid target (server is authoritative).
+            PacketDistributor.sendToServer(new DownedReviveInputPayload(target.getId()));
+            if (reviveTargetId != target.getId()) {
+                Apolinumarise.LOGGER.debug("Revive: hold started on {} (id {}).",
+                        target.getGameProfile().getName(), target.getId());
+                reviveTargetId = target.getId();
+                reviveProgressTicks = 0;
+            }
+            reviveProgressTicks++; // drives the hold-progress fill
+        } else {
+            // Aiming but not holding: keep the indicator (empty bar), but drop any channel we had going.
+            if (reviveTargetId != -1) {
+                PacketDistributor.sendToServer(new DownedReviveInputPayload(-1));
+            }
+            reviveTargetId = -1;
             reviveProgressTicks = 0;
         }
-        reviveProgressTicks++; // Link 3: drives the indicator fill in renderReviveIndicator.
+    }
+
+    // Bite context (infected local player): single press on a downed HEALTHY target while the bar is full.
+    private static void tickBite(Minecraft minecraft, LocalPlayer player) {
+        boolean ready = player.getData(InfectionAttachments.INFECTION).biteBar() >= 100.0F;
+        Player target = pickBiteTarget(player);
+        // Only show the prompt once the bar is actually full AND a valid target is under the crosshair.
+        if (ready && target != null) {
+            indicatorMode = Indicator.BITE;
+        } else {
+            clearIndicator();
+        }
+        // Single discrete press (not hold): collapse any queued clicks into one attempt this tick.
+        boolean pressed = false;
+        while (DownedKeybinds.REVIVE.consumeClick()) {
+            pressed = true;
+        }
+        if (pressed && ready && target != null) {
+            PacketDistributor.sendToServer(new BiteAttemptPayload(target.getId()));
+            Apolinumarise.LOGGER.debug("Bite: press -> attempt on {} (id {}).",
+                    target.getGameProfile().getName(), target.getId());
+        }
     }
 
     // Cancel the channel; tell the server (once) if we had been channeling.
@@ -154,20 +214,31 @@ public final class DownedClientEvents {
         reviveProgressTicks = 0;
     }
 
-    // Entity raycast for a downed, revivable player under the crosshair within reviveRange, with a
-    // proximity fallback. The raycast tests the target's REAL (still-upright) hitbox, not the flat
-    // rendered corpse - so precise aiming works once the pose model sits at the entity (Patch B4). Because
-    // a downed player lies low, a pixel-precise ray can still skim past the standing box; the fallback
-    // then mirrors the server's own accept test (within range + roughly faced) so the client indicator and
-    // the server's revive never disagree.
+    // A downed, REVIVABLE (not fully infected) player under the crosshair within reviveRange.
     private static Player pickReviveTarget(LocalPlayer player) {
-        double range = Config.REVIVE_RANGE.get();
+        return pickDownedTarget(player, Config.REVIVE_RANGE.get(),
+                entity -> entity instanceof Player other && other != player
+                        && other.getData(DownedAttachments.DOWNED).downed()
+                        && other.getData(DownedAttachments.DOWNED).revivable());
+    }
+
+    // A downed, HEALTHY (clean) player under the crosshair within biteRange (Phase 8 bite target).
+    private static Player pickBiteTarget(LocalPlayer player) {
+        return pickDownedTarget(player, Config.BITE_RANGE.get(),
+                entity -> entity instanceof Player other && other != player
+                        && other.getData(DownedAttachments.DOWNED).downed()
+                        && other.getData(DownedAttachments.DOWNED).healthy());
+    }
+
+    // Shared entity pick for downed players under the crosshair within range, with a proximity fallback.
+    // The raycast tests the target's REAL (still-upright) hitbox, not the flat rendered corpse - so precise
+    // aiming works once the pose model sits at the entity (Patch B4). Because a downed player lies low, a
+    // pixel-precise ray can still skim past the standing box; the fallback mirrors the server's own accept
+    // test (within range + roughly faced) so the client indicator and the server never disagree.
+    private static Player pickDownedTarget(LocalPlayer player, double range, Predicate<Entity> eligible) {
         Vec3 eye = player.getEyePosition(1.0F);
         Vec3 look = player.getViewVector(1.0F);
         Vec3 end = eye.add(look.scale(range));
-        Predicate<Entity> eligible = entity -> entity instanceof Player other && other != player
-                && other.getData(DownedAttachments.DOWNED).downed()
-                && other.getData(DownedAttachments.DOWNED).revivable();
 
         AABB searchBox = player.getBoundingBox().expandTowards(look.scale(range)).inflate(1.0D);
         EntityHitResult hit = ProjectileUtil.getEntityHitResult(player, eye, end, searchBox, eligible, range * range);
@@ -175,7 +246,7 @@ public final class DownedClientEvents {
             return target;
         }
 
-        // Fallback: best-aligned downed player within range (dot threshold matches withinReviveReach).
+        // Fallback: best-aligned eligible downed player within range (dot threshold matches the server).
         Player best = null;
         double bestDot = 0.8D;
         for (Player other : player.level().getEntitiesOfClass(Player.class, player.getBoundingBox().inflate(range), eligible)) {
@@ -250,24 +321,32 @@ public final class DownedClientEvents {
             float progress = self.progress(player.level().getGameTime());
             guiGraphics.fillGradient(0, 0, guiGraphics.guiWidth(), guiGraphics.guiHeight(),
                     scaleAlpha(DEATH_GRADIENT_TOP, progress), scaleAlpha(DEATH_GRADIENT_BOTTOM, progress));
-            return; // a downed player never shows the revive indicator
+            return; // a downed player never shows the revive/bite indicator
         }
-        if (reviveTargetId != -1) {
-            renderReviveIndicator(guiGraphics, minecraft);
+        // Prompt shows the ACTUAL bound key label (reflects any rebind), not a hardcoded "G". The revive
+        // and bite prompts share one component; only the label and the hold-progress bar differ.
+        Component keyLabel = DownedKeybinds.REVIVE.getTranslatedKeyMessage();
+        if (indicatorMode == Indicator.REVIVE) {
+            int holdTicks = Math.max(1, (int) Math.ceil(Config.REVIVE_HOLD_SECONDS.get() * 20.0D));
+            float fraction = Math.min(1.0F, reviveProgressTicks / (float) holdTicks);
+            renderKeyIndicator(guiGraphics, minecraft,
+                    Component.translatable("hud.apolinumarise.revive_prompt", keyLabel), true, fraction);
+        } else if (indicatorMode == Indicator.BITE) {
+            // Single press, so no hold bar - the full bite bar (bottom HUD) is what gated this prompt.
+            renderKeyIndicator(guiGraphics, minecraft,
+                    Component.translatable("hud.apolinumarise.bite_prompt", keyLabel), false, 0.0F);
         }
     }
 
-    private static void renderReviveIndicator(GuiGraphics guiGraphics, Minecraft minecraft) {
-        int holdTicks = Math.max(1, (int) Math.ceil(Config.REVIVE_HOLD_SECONDS.get() * 20.0D));
-        float fraction = Math.min(1.0F, reviveProgressTicks / (float) holdTicks);
+    // Shared crosshair-indicator component: a centered prompt, plus an optional hold-progress bar.
+    private static void renderKeyIndicator(GuiGraphics guiGraphics, Minecraft minecraft, Component prompt,
+                                           boolean showProgressBar, float fraction) {
         int centerX = guiGraphics.guiWidth() / 2;
         int centerY = guiGraphics.guiHeight() / 2;
-
-        // Prompt shows the ACTUAL bound key label (reflects any rebind), not a hardcoded "G".
-        KeyMapping key = DownedKeybinds.REVIVE;
-        Component prompt = Component.translatable("hud.apolinumarise.revive_prompt", key.getTranslatedKeyMessage());
         guiGraphics.drawCenteredString(minecraft.font, prompt, centerX, centerY - 32, 0xFFFFFFFF);
-
+        if (!showProgressBar) {
+            return;
+        }
         int barWidth = 70;
         int barHeight = 6;
         int left = centerX - barWidth / 2;

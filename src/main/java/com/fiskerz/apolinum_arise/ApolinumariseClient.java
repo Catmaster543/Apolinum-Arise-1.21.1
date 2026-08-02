@@ -3,6 +3,7 @@ package com.fiskerz.apolinum_arise;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.PlayerSkin;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.api.distmarker.Dist;
@@ -18,6 +19,7 @@ import net.neoforged.neoforge.client.event.RegisterKeyMappingsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
 import com.fiskerz.apolinum_arise.bloodmoon.BloodMoonRegistry;
 import com.fiskerz.apolinum_arise.bloodmoon.client.BloodMoonClientEvents;
@@ -28,6 +30,7 @@ import com.fiskerz.apolinum_arise.downed.client.DownedPoseCommand;
 import com.fiskerz.apolinum_arise.downed.client.DownedPoseLayer;
 import com.fiskerz.apolinum_arise.downed.client.DownedPoses;
 import com.fiskerz.apolinum_arise.infection.InfectionMenus;
+import com.fiskerz.apolinum_arise.infection.client.BiteBarHud;
 import com.fiskerz.apolinum_arise.infection.client.InfectionClientEvents;
 import com.fiskerz.apolinum_arise.infection.client.MoleClientState;
 import com.fiskerz.apolinum_arise.infection.client.MoleRenderLayer;
@@ -47,6 +50,7 @@ public class ApolinumariseClient {
         modEventBus.addListener(ApolinumariseClient::onRegisterMenuScreens);
         modEventBus.addListener(DownedKeybinds::register);
         modEventBus.addListener(DownedClientEvents::onRegisterGuiLayers);
+        modEventBus.addListener(ApolinumariseClient::onRegisterGuiLayers);
         modEventBus.addListener(ApolinumariseClient::onRegisterReloadListeners);
         NeoForge.EVENT_BUS.addListener(BloodMoonClientEvents::onRenderLevelStage);
         NeoForge.EVENT_BUS.addListener(BloodMoonClientEvents::onComputeFogColor);
@@ -65,6 +69,13 @@ public class ApolinumariseClient {
 
     private static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(BloodMoonRegistry.MOSQUITO.get(), MosquitoRenderer::new);
+    }
+
+    // Phase 8: the bite bar, drawn just above the vanilla food bar (BiteBarHud offsets it up further when
+    // Tough As Nails' thirst bar is present). Registered ABOVE the food layer so it draws on top of it.
+    private static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
+        event.registerAbove(VanillaGuiLayers.FOOD_LEVEL,
+                ResourceLocation.fromNamespaceAndPath(Apolinumarise.MODID, "bite_bar"), BiteBarHud::render);
     }
 
     // Load the downed pose files (assets/apolinumarise/downed_poses/pose_N.json) on startup and on every

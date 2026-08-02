@@ -63,6 +63,10 @@ public final class BloodMoonRegistry {
     public static final DeferredHolder<SoundEvent, SoundEvent> MOSQUITO_IDLE_SOUND = SOUND_EVENTS.register("mosquito_idle",
             () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Apolinumarise.MODID, "mosquito_idle")));
 
+    // Phase 8: played on every player-to-player bite attempt (success or failure).
+    public static final DeferredHolder<SoundEvent, SoundEvent> BITE_SOUND = SOUND_EVENTS.register("bite",
+            () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Apolinumarise.MODID, "bite")));
+
     // MONSTER category for despawn rules and Enemy semantics; it never enters vanilla natural
     // spawning - MosquitoSpawner is its only source.
     public static final DeferredHolder<EntityType<?>, EntityType<MosquitoEntity>> MOSQUITO = ENTITY_TYPES.register("mosquito",

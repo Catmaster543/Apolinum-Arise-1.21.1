@@ -487,6 +487,9 @@ public final class InfectionSymptoms {
 
     // Per-tick infected mechanics: sun ignition (any time) + Overworld-night buffs (on refresh cadence).
     private static void tickInfected(ServerPlayer player, ServerLevel overworld, long gameTime, boolean isNight) {
+        // Phase 8: charge the bite bar every tick (contributor-driven; darkness is the first source).
+        BiteBar.tickFill(player, gameTime);
+
         // B1: reuse the exact undead sun mechanic - same detection the incubation checks used, now igniting.
         if (isInSunlight(player)) {
             player.igniteForSeconds(SUN_IGNITE_SECONDS);
@@ -559,7 +562,7 @@ public final class InfectionSymptoms {
     /** Applies full infected state immediately (skipping incubation) and its one-time transition actions. */
     public static void setInfected(ServerPlayer player) {
         int currentDay = currentOverworldDay(player);
-        player.setData(InfectionAttachments.INFECTION, new InfectionData(false, currentDay, true));
+        player.setData(InfectionAttachments.INFECTION, new InfectionData(false, currentDay, true, 0.0F));
         player.setData(SymptomAttachments.SYMPTOMS, SymptomTracker.NONE);
         onBecameInfected(player);  // clears symptoms, unequips helmet/boots, drops current targeting
         resetRuntime(player, false);
@@ -573,7 +576,7 @@ public final class InfectionSymptoms {
     public static void setIncubating(ServerPlayer player, int dayNumber) {
         int currentDay = currentOverworldDay(player);
         int startDay = currentDay - (dayNumber - 1);
-        player.setData(InfectionAttachments.INFECTION, new InfectionData(true, startDay, false));
+        player.setData(InfectionAttachments.INFECTION, new InfectionData(true, startDay, false, 0.0F));
         player.setData(SymptomAttachments.SYMPTOMS, SymptomTracker.NONE.withLastDayProcessed(dayNumber));
         setMoles(player, List.of());
         clearSymptomEffects(player);

@@ -27,8 +27,9 @@
   "container.apolinumarise.restricted_inventory": "Inventory",
 
   "key.categories.apolinumarise": "Apolinum - arise!",
-  "key.apolinumarise.revive": "Revive (hold)",
+  "key.apolinumarise.revive": "Revive (hold) / Bite (press)",
   "hud.apolinumarise.revive_prompt": "Hold %s to revive",
+  "hud.apolinumarise.bite_prompt": "Press %s to bite",
 
   "apolinumarise.configuration.title": "Apolinum - arise! Configs",
   "apolinumarise.configuration.section.apolinumarise.server.toml": "Apolinum - arise! Server Configs",
@@ -98,5 +99,9 @@
   "apolinumarise.configuration.moleGrowthMultiplierMax": "Mole: Growth Multiplier Max",
   "apolinumarise.configuration.moleCapMultiplierMin": "Mole: Cap Multiplier Min",
   "apolinumarise.configuration.moleCapMultiplierMax": "Mole: Cap Multiplier Max",
-  "apolinumarise.configuration.moleDay10SizeMultiplier": "Mole: Day-10 Base Size Multiplier"
+  "apolinumarise.configuration.moleDay10SizeMultiplier": "Mole: Day-10 Base Size Multiplier",
+  "apolinumarise.configuration.biteBarFillRatePercentPer20Sec": "Bite Bar: Fill Rate (% per 20s)",
+  "apolinumarise.configuration.biteBarDarknessThreshold": "Bite Bar: Darkness Threshold (light level)",
+  "apolinumarise.configuration.biteInfectionChance": "Bite: Infection Chance",
+  "apolinumarise.configuration.biteRange": "Bite: Range"
 }

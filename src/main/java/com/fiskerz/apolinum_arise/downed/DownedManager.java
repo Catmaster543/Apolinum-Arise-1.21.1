@@ -81,9 +81,12 @@ public final class DownedManager {
         int durationTicks = Config.DOWNED_DURATION_SECONDS.get() * 20;
         // Freeze the body facing the instant they go down so the corpse never tracks the look direction.
         float bodyYaw = player.yBodyRot;
+        // revivable = not fully infected (revive eligibility); healthy = clean (Phase 8 bite eligibility).
+        // Both captured now and broadcast, since a reviver/biter's client can't see the target's infection.
+        boolean healthy = InfectionLogic.isHealthy(player);
 
         player.setData(DownedAttachments.DOWNED,
-                new DownedData(true, isEligible(player), variant, durationTicks, gameTime, bodyYaw, savedFood, savedSaturation));
+                new DownedData(true, isEligible(player), healthy, variant, durationTicks, gameTime, bodyYaw, savedFood, savedSaturation));
 
         // Same requirement as the infection transition: drop any current lock right now, not just going forward.
         clearCurrentAttackers(player);

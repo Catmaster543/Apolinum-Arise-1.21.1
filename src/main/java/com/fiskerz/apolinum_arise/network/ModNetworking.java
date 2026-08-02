@@ -22,5 +22,8 @@ public final class ModNetworking {
         // Client -> server: hold-to-revive channel input (target entity id, or -1 to break the channel).
         registrar.playToServer(DownedReviveInputPayload.TYPE, DownedReviveInputPayload.STREAM_CODEC,
             DownedReviveInputHandler::handle);
+        // Client -> server: single-press bite attempt on a downed healthy target (Phase 8).
+        registrar.playToServer(BiteAttemptPayload.TYPE, BiteAttemptPayload.STREAM_CODEC,
+            BiteAttemptHandler::handle);
     }
 }

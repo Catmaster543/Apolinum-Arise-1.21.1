@@ -31,7 +31,7 @@ public class DownedGameTests {
         player.setData(InfectionAttachments.INFECTION, InfectionData.NONE.beginIncubating(0));
         helper.assertTrue(DownedManager.isEligible(player), "incubating player is eligible");
 
-        player.setData(InfectionAttachments.INFECTION, new InfectionData(false, 0, true));
+        player.setData(InfectionAttachments.INFECTION, new InfectionData(false, 0, true, 0.0F));
         helper.assertFalse(DownedManager.isEligible(player), "fully infected player is NOT eligible");
         helper.succeed();
     }

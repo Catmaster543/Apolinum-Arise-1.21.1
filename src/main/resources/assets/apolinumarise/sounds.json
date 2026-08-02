@@ -23,5 +23,10 @@
     "sounds": [
       { "name": "apolinumarise:mosquito_idle" }
     ]
+  },
+  "bite": {
+    "sounds": [
+      { "name": "apolinumarise:bite" }
+    ]
   }
 }
