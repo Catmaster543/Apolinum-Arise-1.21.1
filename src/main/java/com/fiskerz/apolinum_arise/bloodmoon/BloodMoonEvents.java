@@ -220,6 +220,9 @@ public final class BloodMoonEvents {
         refreshActiveOverworldEntities(overworld);
         refreshActivePlayers(overworld);
         announceStart(overworld);
+        // Phase 9: the false->true Blood Moon transition is the infected-side skill unlock point -
+        // every currently infected player who lacks it gets infected-side access now.
+        com.fiskerz.apolinum_arise.skill.SkillLogic.onBloodMoonStart(overworld);
     }
 
     // Broadcast the start cue to every online player regardless of dimension: a pale-green chat

@@ -28,6 +28,10 @@
 
   "key.categories.apolinumarise": "Apolinum - arise!",
   "key.apolinumarise.revive": "Revive (hold) / Bite (press)",
+  "key.apolinumarise.open_skills": "Open Skills",
+  "item.apolinumarise.skill_book": "Forbidden Tome",
+  "screen.apolinumarise.skills": "Skills",
+  "gui.apolinumarise.skills": "Skills",
   "hud.apolinumarise.revive_prompt": "Hold %s to revive",
   "hud.apolinumarise.bite_prompt": "Press %s to bite",
 

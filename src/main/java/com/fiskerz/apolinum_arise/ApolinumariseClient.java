@@ -36,6 +36,8 @@ import com.fiskerz.apolinum_arise.infection.client.MoleClientState;
 import com.fiskerz.apolinum_arise.infection.client.MoleRenderLayer;
 import com.fiskerz.apolinum_arise.infection.client.RestrictedInventoryScreen;
 import com.fiskerz.apolinum_arise.mosquito.client.MosquitoRenderer;
+import com.fiskerz.apolinum_arise.skill.client.SkillClientEvents;
+import com.fiskerz.apolinum_arise.skill.client.SkillKeybind;
 
 // This class will not load on dedicated servers. Accessing client side code from here is safe.
 @Mod(value = Apolinumarise.MODID, dist = Dist.CLIENT)
@@ -49,6 +51,7 @@ public class ApolinumariseClient {
         modEventBus.addListener(ApolinumariseClient::onAddLayers);
         modEventBus.addListener(ApolinumariseClient::onRegisterMenuScreens);
         modEventBus.addListener(DownedKeybinds::register);
+        modEventBus.addListener(SkillKeybind::register);
         modEventBus.addListener(DownedClientEvents::onRegisterGuiLayers);
         modEventBus.addListener(ApolinumariseClient::onRegisterGuiLayers);
         modEventBus.addListener(ApolinumariseClient::onRegisterReloadListeners);
@@ -57,6 +60,10 @@ public class ApolinumariseClient {
         NeoForge.EVENT_BUS.addListener(ApolinumariseClient::onLoggingOut);
         // Phase 6 B2: intercept the survival inventory for infected players and open the restricted menu.
         NeoForge.EVENT_BUS.addListener(InfectionClientEvents::onScreenOpening);
+        // Phase 9: the hidden skill-GUI button on the inventory, and the K keybind (in-world + in-screen).
+        NeoForge.EVENT_BUS.addListener(SkillClientEvents::onInventoryInit);
+        NeoForge.EVENT_BUS.addListener(SkillClientEvents::onClientTick);
+        NeoForge.EVENT_BUS.addListener(SkillClientEvents::onScreenKeyPressed);
         // Phase 7 downed/revive client behaviour.
         NeoForge.EVENT_BUS.addListener(DownedClientEvents::onRenderGuiLayerPre);
         NeoForge.EVENT_BUS.addListener(DownedClientEvents::onClientTickPost);

@@ -15,6 +15,9 @@ import com.fiskerz.apolinum_arise.infection.InfectionMenus;
 import com.fiskerz.apolinum_arise.infection.SymptomAttachments;
 import com.fiskerz.apolinum_arise.mosquito.MosquitoEntity;
 import com.fiskerz.apolinum_arise.network.ModNetworking;
+import com.fiskerz.apolinum_arise.skill.ShrineBookInserter;
+import com.fiskerz.apolinum_arise.skill.SkillAttachments;
+import com.fiskerz.apolinum_arise.skill.SkillRegistry;
 
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
@@ -45,6 +48,8 @@ public class Apolinumarise {
         SymptomAttachments.register(modEventBus);
         InfectionMenus.register(modEventBus);
         DownedAttachments.register(modEventBus);
+        SkillRegistry.register(modEventBus);
+        SkillAttachments.register(modEventBus);
         modEventBus.addListener(ModNetworking::register);
         modEventBus.addListener(Apolinumarise::addCreative);
         modEventBus.addListener(Apolinumarise::onEntityAttributeCreation);
@@ -57,6 +62,9 @@ public class Apolinumarise {
         NeoForge.EVENT_BUS.addListener(Apolinumarise::onPlayerChangedDimension);
         NeoForge.EVENT_BUS.addListener(Apolinumarise::onRegisterCommands);
         NeoForge.EVENT_BUS.addListener(Apolinumarise::onLevelLoad);
+
+        // Phase 9: skill-book placement into shrine lecterns as their chunks load (after the flag flips).
+        NeoForge.EVENT_BUS.addListener(ShrineBookInserter::onChunkLoad);
 
         // Phase 5 infection symptom timeline (its own listeners; Phase 3/4 files untouched).
         NeoForge.EVENT_BUS.addListener(InfectionEvents::onServerTick);
@@ -90,6 +98,10 @@ public class Apolinumarise {
     private static void addCreative(BuildCreativeModeTabContentsEvent event) {
         if (event.getTabKey() == CreativeModeTabs.BUILDING_BLOCKS) {
             event.accept(BloodMoonRegistry.AWAKENING_BLOCK_ITEM);
+        }
+        // The skill book lives in Tools & Utilities so it can be handed out for testing before shrines exist.
+        if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
+            event.accept(SkillRegistry.SKILL_BOOK.get());
         }
     }
 

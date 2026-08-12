@@ -143,6 +143,13 @@ public class Config {
                     "(day N = N-1 day-counts after the bite, so N=10 completes at day-10 moonrise).")
             .defineInRange("infectionIncubationDays", 10, 1, 1_000_000);
 
+    // --- Skill system (Phase 9) ---
+
+    public static final ModConfigSpec.IntValue HEALTHY_UNLOCK_INFECTED_THRESHOLD = BUILDER
+            .comment("How many players must EVER complete incubation (cumulative, world-wide) before the healthy-side",
+                    "skill system unlocks permanently. One-way: it never re-locks even if the live infected count drops.")
+            .defineInRange("healthyUnlockInfectedThreshold", 3, 1, 1_000_000);
+
     // --- Blood Moon awakening event (Phase 2) ---
 
     public static final ModConfigSpec.DoubleValue AWAKENING_HEALTH_LEFT = BUILDER

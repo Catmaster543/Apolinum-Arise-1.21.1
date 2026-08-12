@@ -74,14 +74,22 @@ public final class ShrineEffects {
     }
 
     private static boolean isNearShrine(ServerLevel level, BlockPos pos) {
+        return isWithinShrine(level, pos, PROXIMITY_MARGIN);
+    }
+
+    /**
+     * True if {@code pos} lies inside any generated shrine's bounding box, inflated by {@code margin}
+     * (use 0 for strictly-inside). Reuses the Phase 5 structure-instance lookup; only queries already
+     * loaded chunks, so it never forces generation. Shared by the Phase 9 book placement.
+     */
+    public static boolean isWithinShrine(ServerLevel level, BlockPos pos, int margin) {
         Structure shrine = level.registryAccess().registryOrThrow(Registries.STRUCTURE).get(SHRINE);
         if (shrine == null) {
             return false;
         }
         int centerChunkX = pos.getX() >> 4;
         int centerChunkZ = pos.getZ() >> 4;
-        // The 3x3 chunk neighbourhood covers the 5-block margin even at chunk edges. Only already
-        // loaded chunks are queried, so this never forces generation.
+        // The 3x3 chunk neighbourhood covers the margin even at chunk edges.
         for (int dx = -1; dx <= 1; dx++) {
             for (int dz = -1; dz <= 1; dz++) {
                 int chunkX = centerChunkX + dx;
@@ -90,7 +98,7 @@ public final class ShrineEffects {
                     continue;
                 }
                 for (StructureStart start : level.structureManager().startsForStructure(new ChunkPos(chunkX, chunkZ), candidate -> candidate == shrine)) {
-                    if (start.isValid() && start.getBoundingBox().inflatedBy(PROXIMITY_MARGIN).isInside(pos)) {
+                    if (start.isValid() && start.getBoundingBox().inflatedBy(margin).isInside(pos)) {
                         return true;
                     }
                 }

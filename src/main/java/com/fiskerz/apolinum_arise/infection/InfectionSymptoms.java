@@ -483,6 +483,10 @@ public final class InfectionSymptoms {
         clearSymptomEffects(player);
         forceUnequipHelmetBoots(player);   // B3
         clearCurrentAttackers(player);     // B4: drop any current lock (mosquitoes included - Monster is Enemy)
+        // Phase 9: this is the single isIncubating->isInfected convergence point. Bump the global
+        // completion counter (may unlock the healthy skill system) and clear this player's healthy-side
+        // access (mutual exclusivity - they are now on the infected side).
+        com.fiskerz.apolinum_arise.skill.SkillLogic.onIncubationComplete(player);
     }
 
     // Per-tick infected mechanics: sun ignition (any time) + Overworld-night buffs (on refresh cadence).
