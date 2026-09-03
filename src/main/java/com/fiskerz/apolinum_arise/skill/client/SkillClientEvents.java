@@ -1,43 +1,65 @@
 package com.fiskerz.apolinum_arise.skill.client;
 
+import com.fiskerz.apolinum_arise.Apolinumarise;
+import com.fiskerz.apolinum_arise.infection.InfectionAttachments;
+import com.fiskerz.apolinum_arise.infection.InfectionData;
+import com.fiskerz.apolinum_arise.infection.client.RestrictedInventoryScreen;
+import com.fiskerz.apolinum_arise.skill.SkillAccessData;
+import com.fiskerz.apolinum_arise.skill.SkillAttachments;
 import com.fiskerz.apolinum_arise.skill.SkillLogic;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.gui.screens.inventory.InventoryScreen;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.ScreenEvent;
 
 /**
- * Client glue for the skill GUI shell: a hidden button on the survival inventory (only added when the
+ * Client glue for the skill GUI shell: a hidden button on the player's inventory (only added when the
  * local player actually has access), the K keybind (both in-world and while the inventory is open), and
  * the shared open routine. Access is read from the self-synced skill attachment. When the player has
  * neither side unlocked, everything is a completely silent no-op - no button, no feedback.
+ *
+ * <p>"The inventory" means EITHER player-inventory screen: the vanilla one, or the Phase 6
+ * {@link RestrictedInventoryScreen} that infected players get instead. That second case matters a lot -
+ * infected players are the only ones who can hold infected-side access, so matching on
+ * {@code InventoryScreen} alone hid the button from exactly the players it was meant for.
  */
 public final class SkillClientEvents {
     private SkillClientEvents() {}
 
-    // Button placed just right of the player preview, aligned with the top (helmet-slot) row. Textures
-    // pending, so exact placement is easy to nudge later; a plain Button renders as vanilla until then.
+    // Button placed just right of the player preview, aligned with the top (helmet-slot) row.
     private static final int BUTTON_X_OFFSET = 76;
     private static final int BUTTON_Y_OFFSET = 8;
-    private static final int BUTTON_SIZE = 18;
 
-    /** Add the hidden skill button to the inventory screen, only if the local player has access. */
+    /**
+     * Add the skill button to the inventory screen, ONLY if the local player has access to one of the two
+     * sides. With neither side unlocked no widget is created at all - it is not added-but-disabled, because
+     * the button's own icon now reveals which side exists, so its mere presence would leak the feature.
+     */
     public static void onInventoryInit(ScreenEvent.Init.Post event) {
-        if (!(event.getScreen() instanceof InventoryScreen inventory)) {
+        AbstractContainerScreen<?> inventory = playerInventoryScreen(event.getScreen());
+        if (inventory == null) {
             return;
         }
         LocalPlayer player = Minecraft.getInstance().player;
-        if (player == null || !SkillLogic.hasAnyAccess(player)) {
+        if (player == null) {
+            return;
+        }
+        // Naming the screen here makes a "which screen did we actually match?" mismatch obvious in the log.
+        logAccess("inventory-button on " + inventory.getClass().getSimpleName());
+        if (!SkillLogic.hasAnyAccess(player)) {
             return; // locked: no button at all, keeps the feature hidden
         }
-        Button button = Button.builder(Component.translatable("gui.apolinumarise.skills"), b -> openSkills())
-                .bounds(inventory.getGuiLeft() + BUTTON_X_OFFSET, inventory.getGuiTop() + BUTTON_Y_OFFSET, BUTTON_SIZE, BUTTON_SIZE)
-                .build();
-        event.addListener(button);
+        // Mutually exclusive by construction, so exactly one quadrant pair applies whenever we get here.
+        boolean healthySide = SkillLogic.hasHealthyAccess(player);
+        event.addListener(new SkillTreeButton(
+                inventory.getGuiLeft() + BUTTON_X_OFFSET,
+                inventory.getGuiTop() + BUTTON_Y_OFFSET,
+                healthySide,
+                b -> openSkills()));
     }
 
     /** In-world K press (keybinds only fire when no screen is open). */
@@ -47,9 +69,20 @@ public final class SkillClientEvents {
         }
     }
 
-    /** K press while a screen is open (e.g. the inventory): open the skill GUI, replacing it. */
+    /**
+     * The player's inventory screen, whichever variant it is, or null for any other screen. Both extend
+     * {@link AbstractContainerScreen} and use the same 176x166 vanilla inventory layout, so the button's
+     * offsets land identically on either.
+     */
+    private static AbstractContainerScreen<?> playerInventoryScreen(Screen screen) {
+        return screen instanceof InventoryScreen || screen instanceof RestrictedInventoryScreen
+                ? (AbstractContainerScreen<?>) screen
+                : null;
+    }
+
+    /** K press while a screen is open (either inventory variant): open the skill GUI, replacing it. */
     public static void onScreenKeyPressed(ScreenEvent.KeyPressed.Pre event) {
-        if (!(event.getScreen() instanceof InventoryScreen)) {
+        if (playerInventoryScreen(event.getScreen()) == null) {
             return;
         }
         if (SkillKeybind.OPEN_SKILLS.matches(event.getKeyCode(), event.getScanCode())) {
@@ -66,9 +99,32 @@ public final class SkillClientEvents {
     private static void openSkills() {
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
-        if (player == null || !SkillLogic.hasAnyAccess(player)) {
+        if (player == null) {
+            return;
+        }
+        logAccess("open");
+        if (!SkillLogic.hasAnyAccess(player)) {
             return;
         }
         minecraft.setScreen(new SkillScreen());
+    }
+
+    /**
+     * Diagnostic for "the GUI opens when it shouldn't": dumps the ACTUAL access flags the check reads (as
+     * synced to this client) alongside the infection state they are supposed to correspond to, at the exact
+     * moment of the check. A line reading {@code infectedAccess=true} while {@code infected=false} is the
+     * stale-flag case fixed by {@link SkillLogic#onNoLongerInfected}.
+     */
+    private static void logAccess(String where) {
+        LocalPlayer player = Minecraft.getInstance().player;
+        if (player == null) {
+            return;
+        }
+        SkillAccessData access = player.getData(SkillAttachments.SKILL_ACCESS);
+        InfectionData infection = player.getData(InfectionAttachments.INFECTION);
+        Apolinumarise.LOGGER.debug("[Skill] access check ({}): healthyAccess={} infectedAccess={} -> hasAny={} "
+                        + "| infection: infected={} incubating={}",
+                where, access.healthyAccess(), access.infectedAccess(), access.hasAny(),
+                infection.infected(), infection.incubating());
     }
 }

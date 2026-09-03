@@ -24,6 +24,7 @@
   "message.apolinumarise.infection.status.incubating": "Incubating (day %s of %s)",
   "message.apolinumarise.infection.status.infected": "Infected",
   "message.apolinumarise.infection.set": "Set %s to %s",
+  "message.apolinumarise.skill.book_used": "The knowledge settles in. Your skills are open to you.",
   "container.apolinumarise.restricted_inventory": "Inventory",
 
   "key.categories.apolinumarise": "Apolinum - arise!",
@@ -107,5 +108,11 @@
   "apolinumarise.configuration.biteBarFillRatePercentPer20Sec": "Bite Bar: Fill Rate (% per 20s)",
   "apolinumarise.configuration.biteBarDarknessThreshold": "Bite Bar: Darkness Threshold (light level)",
   "apolinumarise.configuration.biteInfectionChance": "Bite: Infection Chance",
-  "apolinumarise.configuration.biteRange": "Bite: Range"
+  "apolinumarise.configuration.biteRange": "Bite: Range",
+  "apolinumarise.configuration.sleepBarDrainDays": "Sleep: Drain Time (Days, 100% -> 0%)",
+  "apolinumarise.configuration.sleepBarNightRefillMultiplier": "Sleep: Night Refill Multiplier",
+  "apolinumarise.configuration.sleepBarDayOrBloodMoonRefillMultiplier": "Sleep: Day / Blood Moon Refill Multiplier",
+  "apolinumarise.configuration.sleepZeroSlownessDays": "Sleep: Days at 0% Before Slowness",
+  "apolinumarise.configuration.sleepZeroPassOutDays": "Sleep: Days at 0% Before Pass-Out",
+  "apolinumarise.configuration.sleepPassOutExitThreshold": "Sleep: Pass-Out Exit Threshold (%)"
 }

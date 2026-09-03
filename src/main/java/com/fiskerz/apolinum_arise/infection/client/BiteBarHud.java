@@ -1,6 +1,8 @@
 package com.fiskerz.apolinum_arise.infection.client;
 
 import com.fiskerz.apolinum_arise.Apolinumarise;
+import com.fiskerz.apolinum_arise.client.StatusBarLayout;
+import com.fiskerz.apolinum_arise.client.StatusBarRenderer;
 import com.fiskerz.apolinum_arise.downed.DownedManager;
 import com.fiskerz.apolinum_arise.infection.InfectionAttachments;
 import com.fiskerz.apolinum_arise.infection.InfectionLogic;
@@ -10,19 +12,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
-import net.neoforged.fml.ModList;
 
 /**
  * The Phase 8 bite bar: a bottom-HUD fill bar shown ONLY to the local player while they are fully infected.
- * It sits directly above the hunger bar, and stacks one row higher when Tough As Nails is present so it
- * never overlaps that mod's thirst bar (which renders one row above hunger).
+ * It counts UP from 0 to 100, and its extra "ready" strip shows at 100%.
  *
- * <p>Texture is a standard vertical two/three-strip sheet at {@link #TEXTURE}: an empty strip drawn full
- * width as the background, a filled strip cropped to {@code (percent/100 * width)} from the left, and a
- * distinct "ready" strip swapped in at 100%. The file is not shipped yet - until it lands, the missing
- * texture simply renders as the usual magenta/black placeholder (no crash), same as every other pending
- * asset in this mod.
+ * <p>Geometry and the three-strip draw order live in {@link StatusBarRenderer}, shared with the sleep bar.
  */
 public final class BiteBarHud {
     private BiteBarHud() {}
@@ -31,22 +26,6 @@ public final class BiteBarHud {
     //   v=0  frame (border/decoration, transparent interior), v=9  filled, v=18  ready (100%) overlay.
     public static final ResourceLocation TEXTURE =
             ResourceLocation.fromNamespaceAndPath(Apolinumarise.MODID, "textures/gui/bite_bar.png");
-    private static final int BAR_WIDTH = 81;
-    private static final int STRIP_HEIGHT = 9;
-    private static final int TEXTURE_WIDTH = 81;
-    private static final int TEXTURE_HEIGHT = 27;
-    private static final int V_FRAME = 0;
-    private static final int V_FILLED = 9;
-    private static final int V_READY = 18;
-
-    // Right edge aligns with the vanilla food bar's right edge (screen center + 91).
-    private static final int FOOD_BAR_RIGHT_OFFSET = 91;
-    // The food bar's own row; one row (10px) above it is where air/thirst live.
-    private static final int FOOD_ROW_FROM_BOTTOM = 39;
-    private static final int ROW_HEIGHT = 10;
-
-    private static final String TOUGH_AS_NAILS_ID = "toughasnails";
-    private static Boolean toughAsNailsLoaded; // resolved lazily; the mod list is fixed at runtime
 
     public static void render(GuiGraphics guiGraphics, DeltaTracker deltaTracker) {
         Minecraft minecraft = Minecraft.getInstance();
@@ -55,39 +34,16 @@ public final class BiteBarHud {
             return;
         }
         // Only the local player, only while FULLY infected (not incubating, not healthy), and not while
-        // downed (the downed fade owns the screen then).
-        if (!InfectionLogic.isInfected(player) || DownedManager.isDowned(player)) {
+        // incapacitated (the downed fade / pass-out owns the screen then).
+        if (!InfectionLogic.isInfected(player) || DownedManager.isIncapacitated(player)) {
             return;
         }
-        float percent = Mth.clamp(player.getData(InfectionAttachments.INFECTION).biteBar(), 0.0F, 100.0F);
+        float percent = player.getData(InfectionAttachments.INFECTION).biteBar();
+        // This bar's extra strip is the "ready to bite" state: exactly full.
+        boolean ready = percent >= 100.0F;
 
-        int screenWidth = guiGraphics.guiWidth();
-        int screenHeight = guiGraphics.guiHeight();
-        int x = screenWidth / 2 + FOOD_BAR_RIGHT_OFFSET - BAR_WIDTH;
-        // Directly above the hunger bar; one extra row up when TAN's thirst bar occupies that first row.
-        int rowsAboveFood = 1 + (isToughAsNailsLoaded() ? 1 : 0);
-        int y = screenHeight - FOOD_ROW_FROM_BOTTOM - rowsAboveFood * ROW_HEIGHT;
-
-        // Draw order: fill FIRST (underneath), then the frame on top. The frame's interior is transparent,
-        // so the fill shows through it while the frame's border/decoration still renders correctly above.
-        int filledWidth = Math.round(BAR_WIDTH * percent / 100.0F);
-        if (filledWidth > 0) {
-            // The fill is drawn at every percentage including 100% (full width) - it is never hidden/swapped.
-            guiGraphics.blit(TEXTURE, x, y, 0.0F, (float) V_FILLED, filledWidth, STRIP_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-        }
-        if (percent >= 100.0F) {
-            // At full, the "ready" distinction layers ON TOP of the still-visible full bar - it does not
-            // replace it. It stays until an actual bite resets the bar to 0%.
-            guiGraphics.blit(TEXTURE, x, y, 0.0F, (float) V_READY, BAR_WIDTH, STRIP_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-        }
-        // Frame last, on top of the fill. A missing texture renders as the placeholder here.
-        guiGraphics.blit(TEXTURE, x, y, 0.0F, (float) V_FRAME, BAR_WIDTH, STRIP_HEIGHT, TEXTURE_WIDTH, TEXTURE_HEIGHT);
-    }
-
-    private static boolean isToughAsNailsLoaded() {
-        if (toughAsNailsLoaded == null) {
-            toughAsNailsLoaded = ModList.get().isLoaded(TOUGH_AS_NAILS_ID);
-        }
-        return toughAsNailsLoaded;
+        StatusBarRenderer.render(guiGraphics, TEXTURE,
+                StatusBarLayout.left(guiGraphics, StatusBarRenderer.BAR_WIDTH), StatusBarLayout.top(guiGraphics),
+                percent, ready);
     }
 }

@@ -1,5 +1,9 @@
 package com.fiskerz.apolinum_arise.skill;
 
+import com.fiskerz.apolinum_arise.Apolinumarise;
+import com.fiskerz.apolinum_arise.config.Config;
+
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -32,12 +36,29 @@ public class SkillBookItem extends Item {
             return InteractionResultHolder.success(stack);
         }
         // Defensive: books only ever exist after the flag flips, but never grant if it somehow isn't set,
-        // and never re-grant to a player who already has healthy access.
-        if (!HealthySkillState.isUnlocked(serverLevel) || SkillLogic.hasHealthyAccess(serverPlayer)) {
+        // and never re-grant to a player who already has healthy access. Both cases are a silent no-op by
+        // design (the feature stays hidden while locked), which looks exactly like "the book is broken" when
+        // testing with a creative-tab copy before the unlock - so say which branch was taken.
+        if (!HealthySkillState.isUnlocked(serverLevel)) {
+            Apolinumarise.LOGGER.debug("[Skill] {} used the book but the healthy system is still LOCKED "
+                            + "(everInfectedCount={} of {} needed) - not granted, not consumed.",
+                    serverPlayer.getGameProfile().getName(), HealthySkillState.everInfectedCount(serverLevel),
+                    Config.HEALTHY_UNLOCK_INFECTED_THRESHOLD.get());
+            return InteractionResultHolder.pass(stack);
+        }
+        if (SkillLogic.hasHealthyAccess(serverPlayer)) {
+            Apolinumarise.LOGGER.debug("[Skill] {} used the book but already holds healthy-side access "
+                    + "- not consumed.", serverPlayer.getGameProfile().getName());
             return InteractionResultHolder.pass(stack);
         }
         SkillLogic.grantHealthyAccess(serverPlayer);
         stack.shrink(1);
+        // Confirm the grant on the actionbar. The locked/already-held cases stay silent (the feature is
+        // meant to be invisible until unlocked); this one only fires once access actually exists, so it
+        // reveals nothing new - it just makes "did that work?" answerable without reading the log.
+        serverPlayer.displayClientMessage(Component.translatable("message.apolinumarise.skill.book_used"), true);
+        Apolinumarise.LOGGER.debug("[Skill] {} consumed a skill book and gained healthy-side access.",
+                serverPlayer.getGameProfile().getName());
         return InteractionResultHolder.success(stack);
     }
 }

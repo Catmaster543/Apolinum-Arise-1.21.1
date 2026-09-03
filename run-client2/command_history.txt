@@ -7,3 +7,6 @@
 /kill Dev
 /infection set Dev healthy
 /kill Dev2
+/tp Dev2 Dev
+/bloodmoon force stop
+/time set night

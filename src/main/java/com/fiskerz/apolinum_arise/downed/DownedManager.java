@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.fiskerz.apolinum_arise.Apolinumarise;
 import com.fiskerz.apolinum_arise.config.Config;
 import com.fiskerz.apolinum_arise.infection.InfectionLogic;
+import com.fiskerz.apolinum_arise.sleep.SleepAttachments;
 
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -42,6 +43,20 @@ public final class DownedManager {
 
     public static boolean isDowned(Player player) {
         return player.getData(DownedAttachments.DOWNED).downed();
+    }
+
+    /**
+     * True when the player is incapacitated by EITHER the real downed state or the Phase 10a exhaustion
+     * pass-out. This is the predicate the shared PRESENTATION uses - camera lock, HUD hiding, input lock,
+     * pose rendering, hostile de-aggro - so pass-out reuses all of it without duplicating any of it.
+     *
+     * <p>Deliberately NOT used by the downed MECHANICS: death interception, the health floor, the revive
+     * timer and revive/bite targeting all stay on {@link #isDowned} alone, because a passed-out player is
+     * fully vulnerable, has no timer, and cannot be interacted with by other players in either direction.
+     * Reads the attachments directly so the two systems stay decoupled.
+     */
+    public static boolean isIncapacitated(Player player) {
+        return isDowned(player) || player.getData(SleepAttachments.SLEEP).passedOut();
     }
 
     /** Revive eligibility (both directions): healthy or incubating - i.e. NOT fully infected. */

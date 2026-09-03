@@ -9,6 +9,7 @@ import com.fiskerz.apolinum_arise.infection.InfectionAttachments;
 import com.fiskerz.apolinum_arise.infection.InfectionLogic;
 import com.fiskerz.apolinum_arise.network.BiteAttemptPayload;
 import com.fiskerz.apolinum_arise.network.DownedReviveInputPayload;
+import com.fiskerz.apolinum_arise.sleep.SleepAttachments;
 
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
@@ -73,7 +74,7 @@ public final class DownedClientEvents {
     // ------------------------------------------------------------------ HUD hiding
 
     public static void onRenderGuiLayerPre(RenderGuiLayerEvent.Pre event) {
-        if (!selfDowned()) {
+        if (!selfIncapacitated()) {
             return;
         }
         ResourceLocation name = event.getName();
@@ -91,13 +92,14 @@ public final class DownedClientEvents {
         if (player == null) {
             return;
         }
-        boolean downed = DownedManager.isDowned(player);
+        // Downed or passed out from exhaustion: identical presentation and identical inability to act.
+        boolean incapacitated = DownedManager.isIncapacitated(player);
         // Previewing a pose forces third person too (so the tester can see their own posed model), but
         // does NOT lock input or hide the HUD - they still need to move and type commands.
-        updateCamera(minecraft, downed || DownedPoses.previewVariant() >= 0);
+        updateCamera(minecraft, incapacitated || DownedPoses.previewVariant() >= 0);
 
-        if (downed) {
-            resetChannel(false); // a downed player can't revive or bite
+        if (incapacitated) {
+            resetChannel(false); // an incapacitated player can't revive or bite
             clearIndicator();
             drainClicks();
             return;
@@ -222,12 +224,16 @@ public final class DownedClientEvents {
                         && other.getData(DownedAttachments.DOWNED).revivable());
     }
 
-    // A downed, HEALTHY (clean) player under the crosshair within biteRange (Phase 8 bite target).
+    // An incapacitated, HEALTHY (clean) player under the crosshair within biteRange (Phase 8 bite target).
+    // Either incapacitation qualifies: really downed (Phase 7) or passed out from exhaustion (Phase 10a).
+    // Each state carries its own broadcast "healthy" flag, because infection is synced only to its owner.
     private static Player pickBiteTarget(LocalPlayer player) {
         return pickDownedTarget(player, Config.BITE_RANGE.get(),
                 entity -> entity instanceof Player other && other != player
-                        && other.getData(DownedAttachments.DOWNED).downed()
-                        && other.getData(DownedAttachments.DOWNED).healthy());
+                        && (other.getData(DownedAttachments.DOWNED).downed()
+                                ? other.getData(DownedAttachments.DOWNED).healthy()
+                                : other.getData(SleepAttachments.SLEEP).passedOut()
+                                        && other.getData(SleepAttachments.SLEEP).healthy()));
     }
 
     // Shared entity pick for downed players under the crosshair within range, with a proximity fallback.
@@ -266,7 +272,7 @@ public final class DownedClientEvents {
     // ------------------------------------------------------------------ input lock
 
     public static void onMovementInput(MovementInputUpdateEvent event) {
-        if (!selfDowned()) {
+        if (!selfIncapacitated()) {
             return;
         }
         Input input = event.getInput();
@@ -282,8 +288,8 @@ public final class DownedClientEvents {
     }
 
     public static void onInteractionKey(InputEvent.InteractionKeyMappingTriggered event) {
-        if (selfDowned()) {
-            event.setCanceled(true); // no attacking / item use / interaction while downed
+        if (selfIncapacitated()) {
+            event.setCanceled(true); // no attacking / item use / interaction while downed or passed out
         }
     }
 
@@ -291,18 +297,19 @@ public final class DownedClientEvents {
 
     public static void onRenderPlayerPre(RenderPlayerEvent.Pre event) {
         var player = event.getEntity();
-        DownedData data = player.getData(DownedAttachments.DOWNED);
+        boolean incapacitated = IncapacitatedRender.active(player);
         boolean preview = DownedPoses.previewVariant() >= 0 && Minecraft.getInstance().player == player;
-        if (data.downed() || preview) {
+        if (incapacitated || preview) {
             // The DownedPoseLayer re-enables + re-poses + renders the body itself.
             event.getRenderer().getModel().setAllVisible(false);
         }
-        if (data.downed()) {
+        if (incapacitated) {
             // Patch B6: the client keeps recomputing yBodyRot from the look direction (especially for the
-            // local player), so the corpse would rotate with the camera. Pin the rendered body facing to
-            // the value frozen at down-time (synced via DownedData). Both O and current => no interpolation.
-            player.yBodyRot = data.bodyYaw();
-            player.yBodyRotO = data.bodyYaw();
+            // local player), so the body would rotate with the camera. Pin the rendered facing to the value
+            // frozen when they went down / passed out. Both O and current => no interpolation.
+            float bodyYaw = IncapacitatedRender.bodyYaw(player);
+            player.yBodyRot = bodyYaw;
+            player.yBodyRotO = bodyYaw;
         }
     }
 
@@ -362,8 +369,10 @@ public final class DownedClientEvents {
         return (alpha << 24) | (argb & 0x00FFFFFF);
     }
 
-    private static boolean selfDowned() {
+    // Covers both the downed state and the Phase 10a pass-out: the HUD hiding, camera lock and input lock
+    // are shared presentation, so they key off the same predicate.
+    private static boolean selfIncapacitated() {
         Minecraft minecraft = Minecraft.getInstance();
-        return minecraft.player != null && DownedManager.isDowned(minecraft.player);
+        return minecraft.player != null && DownedManager.isIncapacitated(minecraft.player);
     }
 }

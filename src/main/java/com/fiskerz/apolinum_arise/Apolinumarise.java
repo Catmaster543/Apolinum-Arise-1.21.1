@@ -18,6 +18,8 @@ import com.fiskerz.apolinum_arise.network.ModNetworking;
 import com.fiskerz.apolinum_arise.skill.ShrineBookInserter;
 import com.fiskerz.apolinum_arise.skill.SkillAttachments;
 import com.fiskerz.apolinum_arise.skill.SkillRegistry;
+import com.fiskerz.apolinum_arise.sleep.SleepAttachments;
+import com.fiskerz.apolinum_arise.sleep.SleepEvents;
 
 import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
@@ -50,6 +52,7 @@ public class Apolinumarise {
         DownedAttachments.register(modEventBus);
         SkillRegistry.register(modEventBus);
         SkillAttachments.register(modEventBus);
+        SleepAttachments.register(modEventBus);
         modEventBus.addListener(ModNetworking::register);
         modEventBus.addListener(Apolinumarise::addCreative);
         modEventBus.addListener(Apolinumarise::onEntityAttributeCreation);
@@ -87,6 +90,14 @@ public class Apolinumarise {
         NeoForge.EVENT_BUS.addListener(DownedEvents::onEntityInteract);
         NeoForge.EVENT_BUS.addListener(DownedEvents::onLeftClickBlock);
         NeoForge.EVENT_BUS.addListener(DownedEvents::onBlockBreak);
+
+        // Phase 10a sleep bar / pass-out (server-side listeners).
+        NeoForge.EVENT_BUS.addListener(SleepEvents::onServerTick);
+        NeoForge.EVENT_BUS.addListener(SleepEvents::onSleepFinished);
+        NeoForge.EVENT_BUS.addListener(SleepEvents::onCanPlayerSleep);
+        NeoForge.EVENT_BUS.addListener(SleepEvents::onCanContinueSleeping);
+        NeoForge.EVENT_BUS.addListener(SleepEvents::onPlayerLoggedIn);
+        NeoForge.EVENT_BUS.addListener(SleepEvents::onPlayerLoggedOut);
 
         // SERVER config: per-world, admin-controlled (see config.Config)
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SPEC);

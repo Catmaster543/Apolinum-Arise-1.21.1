@@ -67,16 +67,31 @@ public final class SkillLogic {
     }
 
     /**
-     * STUB, ready for a future cure trigger (curing does not exist yet, so nothing calls this). Clears
-     * infected-side access and (future) infected progress ONLY. Per the design a cured player does NOT
-     * regain healthy access automatically - they must obtain a new book - so this clears nothing else.
+     * The single "this player is no longer infected" path. Clears infected-side access and (future)
+     * infected progress ONLY. Per the design a player who leaves the infected side does NOT regain healthy
+     * access automatically - they must obtain a new book - so this clears nothing else.
+     *
+     * <p>Phase 10a bugfix: infected-side access is granted to every infected player at the next Blood Moon,
+     * but nothing used to take it back when they stopped being infected, and the attachment is persisted +
+     * copyOnDeath. A player moved back to healthy/incubating by {@code /infection set} therefore kept a
+     * stale {@code infectedAccess}, which is all {@code hasAnyAccess} looks at - so the skill GUI still
+     * opened for them. Every "left the infected side" transition now runs through here.
      */
-    public static void onPlayerCured(Player player) {
+    public static void onNoLongerInfected(Player player) {
         SkillAccessData data = player.getData(SkillAttachments.SKILL_ACCESS);
         if (data.infectedAccess()) {
             player.setData(SkillAttachments.SKILL_ACCESS, data.clearedInfected());
-            Apolinumarise.LOGGER.debug("[Skill] Cleared infected-side access from {} (cured).", player.getGameProfile().getName());
+            Apolinumarise.LOGGER.debug("[Skill] Cleared stale infected-side access from {} (no longer infected).",
+                    player.getGameProfile().getName());
         }
+    }
+
+    /**
+     * STUB, ready for a future cure trigger (curing does not exist yet, so nothing calls this). A cure is
+     * just one way of leaving the infected side, so it shares the implementation above.
+     */
+    public static void onPlayerCured(Player player) {
+        onNoLongerInfected(player);
     }
 
     // ---------------------------------------------------------------- existing-hook entry points

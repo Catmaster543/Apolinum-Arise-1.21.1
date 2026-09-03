@@ -560,6 +560,9 @@ public final class InfectionSymptoms {
         clearSymptomEffects(player);
         clearInfectedEffects(player);
         player.closeContainer(); // drop the restricted inventory if it is currently open
+        // Leaving the infected side must also drop infected-side skill access, or the persisted flag would
+        // keep the skill GUI open for a player whose unlock condition no longer holds (Phase 10a bugfix).
+        com.fiskerz.apolinum_arise.skill.SkillLogic.onNoLongerInfected(player);
         resetRuntime(player, false);
     }
 
@@ -585,6 +588,8 @@ public final class InfectionSymptoms {
         setMoles(player, List.of());
         clearSymptomEffects(player);
         clearInfectedEffects(player);
+        // Incubating is not infected either, so the same stale-access clear applies (Phase 10a bugfix).
+        com.fiskerz.apolinum_arise.skill.SkillLogic.onNoLongerInfected(player);
         resetRuntime(player, true);
     }
 

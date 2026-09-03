@@ -360,6 +360,41 @@ public class Config {
             .comment("Maximum distance (blocks) at which an infected player can bite a downed healthy target.")
             .defineInRange("biteRange", 3.0D, 0.5D, 64.0D);
 
+    // --- Sleep bar & pass-out (Phase 10a): applies ONLY to players who are not fully infected ---
+
+    public static final ModConfigSpec.DoubleValue SLEEP_BAR_DRAIN_DAYS = BUILDER
+            .comment("Days of elapsed game time for the sleep bar to fall from 100% to 0%, regardless of activity.",
+                    "The drain never pauses (not even while lying in a bed), so at the default 3 one full day",
+                    "of drain is 100/3 = 33.33%.")
+            .defineInRange("sleepBarDrainDays", 3.0D, 0.01D, 1000.0D);
+
+    public static final ModConfigSpec.DoubleValue SLEEP_BAR_NIGHT_REFILL_MULTIPLIER = BUILDER
+            .comment("Scales the base refill rate, which is calibrated so one full night of continuous lying",
+                    "(the vanilla sleepable window, 10918 ticks) restores 100/3 = 33.33% at a multiplier of 1.0.",
+                    "The default 1.5 raises that to 100/2 = 50% per night, so sleeping 2 nights out of every 3",
+                    "exactly sustains the 3-day drain instead of having to sleep every single night.")
+            .defineInRange("sleepBarNightRefillMultiplier", 1.5D, 0.0D, 100.0D);
+
+    public static final ModConfigSpec.DoubleValue SLEEP_BAR_DAY_OR_BLOOD_MOON_REFILL_MULTIPLIER = BUILDER
+            .comment("Extra multiplier applied to the night refill rate while lying during the DAY or during an",
+                    "active Blood Moon (0.5 = half rate). Does not apply to the involuntary pass-out state.")
+            .defineInRange("sleepBarDayOrBloodMoonRefillMultiplier", 0.5D, 0.0D, 100.0D);
+
+    public static final ModConfigSpec.DoubleValue SLEEP_ZERO_SLOWNESS_DAYS = BUILDER
+            .comment("Days spent CONTINUOUSLY at 0% before Slowness I is added and Weakness escalates to II.",
+                    "Any refill above 0% clears the effects and resets this clock to zero.")
+            .defineInRange("sleepZeroSlownessDays", 2.0D, 0.0D, 1000.0D);
+
+    public static final ModConfigSpec.DoubleValue SLEEP_ZERO_PASS_OUT_DAYS = BUILDER
+            .comment("Days spent CONTINUOUSLY at 0% before the player passes out (see sleepPassOutExitThreshold).")
+            .defineInRange("sleepZeroPassOutDays", 3.0D, 0.0D, 1000.0D);
+
+    public static final ModConfigSpec.DoubleValue SLEEP_PASS_OUT_EXIT_THRESHOLD = BUILDER
+            .comment("Bar percentage at which the pass-out state ends. Purely bar-based, never time-based.",
+                    "A passed-out player refills at the base night rate (they are unconscious, not napping)",
+                    "while the drain keeps running, so at the defaults a pass-out lasts about 78 seconds.")
+            .defineInRange("sleepPassOutExitThreshold", 5.0D, 0.0D, 100.0D);
+
     /** Per-day mole chance for a symptom day number (6..10); returns 0 for days 1-5 or out-of-range. */
     public static double getMoleChanceForDay(int dayNumber) {
         List<? extends Double> table = MOLE_CHANCE_PER_DAY.get();

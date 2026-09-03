@@ -36,6 +36,7 @@ import com.fiskerz.apolinum_arise.infection.client.MoleClientState;
 import com.fiskerz.apolinum_arise.infection.client.MoleRenderLayer;
 import com.fiskerz.apolinum_arise.infection.client.RestrictedInventoryScreen;
 import com.fiskerz.apolinum_arise.mosquito.client.MosquitoRenderer;
+import com.fiskerz.apolinum_arise.sleep.client.SleepBarHud;
 import com.fiskerz.apolinum_arise.skill.client.SkillClientEvents;
 import com.fiskerz.apolinum_arise.skill.client.SkillKeybind;
 
@@ -78,11 +79,15 @@ public class ApolinumariseClient {
         event.registerEntityRenderer(BloodMoonRegistry.MOSQUITO.get(), MosquitoRenderer::new);
     }
 
-    // Phase 8: the bite bar, drawn just above the vanilla food bar (BiteBarHud offsets it up further when
-    // Tough As Nails' thirst bar is present). Registered ABOVE the food layer so it draws on top of it.
+    // Phase 8/10a: the two status bars, drawn just above the vanilla food bar (StatusBarLayout offsets them
+    // up further when Tough As Nails' thirst bar is present). They share one slot and are mutually
+    // exclusive - bite bar while fully infected, sleep bar otherwise - so each simply declines to draw.
+    // Registered ABOVE the food layer so they draw on top of it.
     private static void onRegisterGuiLayers(RegisterGuiLayersEvent event) {
         event.registerAbove(VanillaGuiLayers.FOOD_LEVEL,
                 ResourceLocation.fromNamespaceAndPath(Apolinumarise.MODID, "bite_bar"), BiteBarHud::render);
+        event.registerAbove(VanillaGuiLayers.FOOD_LEVEL,
+                ResourceLocation.fromNamespaceAndPath(Apolinumarise.MODID, "sleep_bar"), SleepBarHud::render);
     }
 
     // Load the downed pose files (assets/apolinumarise/downed_poses/pose_N.json) on startup and on every

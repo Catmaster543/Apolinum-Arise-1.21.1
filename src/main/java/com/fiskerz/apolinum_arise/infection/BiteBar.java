@@ -101,8 +101,11 @@ public final class BiteBar {
 
     /**
      * Server-authoritative resolution of a single bite press. Validates the biter (infected + full bar) and
-     * the target (downed + healthy + in range/faced); on a valid attempt plays the SFX, rolls infection, and
-     * resets the biter's bar to 0 - regardless of whether the infection roll succeeded.
+     * the target (incapacitated + healthy + in range/faced); on a valid attempt plays the SFX, rolls
+     * infection, and resets the biter's bar to 0 - regardless of whether the infection roll succeeded.
+     *
+     * <p>A valid target is EITHER really downed (Phase 7) or passed out from exhaustion (Phase 10a) -
+     * {@code isIncapacitated} covers both, so the visual-only pass-out is bitable too.
      */
     public static void attemptBite(ServerPlayer biter, int targetId) {
         InfectionData biterData = biter.getData(InfectionAttachments.INFECTION);
@@ -111,7 +114,7 @@ public final class BiteBar {
         }
         if (!(biter.level().getEntity(targetId) instanceof ServerPlayer target)
                 || target == biter
-                || !DownedManager.isDowned(target)
+                || !DownedManager.isIncapacitated(target)
                 || !InfectionLogic.isHealthy(target)
                 || !withinBiteRange(biter, target)
                 || !(biter.level() instanceof ServerLevel serverLevel)) {
@@ -120,6 +123,15 @@ public final class BiteBar {
 
         // Reuse the normal attack swing as a free animation stand-in (broadcast to nearby clients).
         biter.swing(InteractionHand.MAIN_HAND, true);
+        // A bite interrupts sleep. Vanilla wakes a sleeping entity from any incoming DAMAGE
+        // (LivingEntity.hurt -> stopSleeping), but a bite deals none, so end it explicitly: lying in a bed
+        // grants no protection here, and this is the hook that will also cut a dream sequence short and
+        // hand the camera/controls back once dreams exist.
+        if (target.isSleeping()) {
+            target.stopSleeping();
+            Apolinumarise.LOGGER.debug("Bite: woke {} out of bed (sleep/dream interrupted by a bite).",
+                    target.getGameProfile().getName());
+        }
         // SFX on EVERY attempt, success or failure.
         serverLevel.playSound(null, target.getX(), target.getY(), target.getZ(),
                 BloodMoonRegistry.BITE_SOUND.get(), SoundSource.PLAYERS, 1.0F, 1.0F);

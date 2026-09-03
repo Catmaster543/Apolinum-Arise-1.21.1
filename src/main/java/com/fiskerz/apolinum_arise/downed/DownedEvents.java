@@ -48,47 +48,49 @@ public final class DownedEvents {
         }
     }
 
-    // Hostile mobs neither start nor continue targeting a downed player.
+    // Hostile mobs neither start nor continue targeting an incapacitated player - downed, or passed out
+    // from exhaustion (Phase 10a): can't fight back, so shouldn't be freely farmable either.
     public static void onLivingChangeTarget(LivingChangeTargetEvent event) {
         if (event.getEntity().level().isClientSide() || !(event.getEntity() instanceof Enemy)) {
             return;
         }
         LivingEntity target = event.getNewAboutToBeSetTarget();
-        if (target instanceof Player player && DownedManager.isDowned(player)) {
+        if (target instanceof Player player && DownedManager.isIncapacitated(player)) {
             event.setNewAboutToBeSetTarget(null);
         }
     }
 
-    // ------- Server-side input lock: a downed player cannot attack, break, use, or interact -------
+    // ------- Server-side input lock: an incapacitated player cannot attack, break, use, or interact -------
+    // Shared by the downed state and the Phase 10a pass-out, which reuses this lock rather than adding one.
 
     public static void onAttackEntity(AttackEntityEvent event) {
-        cancelIfDowned(event.getEntity(), event);
+        cancelIfIncapacitated(event.getEntity(), event);
     }
 
     public static void onRightClickBlock(PlayerInteractEvent.RightClickBlock event) {
-        cancelIfDowned(event.getEntity(), event);
+        cancelIfIncapacitated(event.getEntity(), event);
     }
 
     public static void onRightClickItem(PlayerInteractEvent.RightClickItem event) {
-        cancelIfDowned(event.getEntity(), event);
+        cancelIfIncapacitated(event.getEntity(), event);
     }
 
     public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
-        cancelIfDowned(event.getEntity(), event);
+        cancelIfIncapacitated(event.getEntity(), event);
     }
 
     public static void onLeftClickBlock(PlayerInteractEvent.LeftClickBlock event) {
-        cancelIfDowned(event.getEntity(), event);
+        cancelIfIncapacitated(event.getEntity(), event);
     }
 
     public static void onBlockBreak(BlockEvent.BreakEvent event) {
-        if (DownedManager.isDowned(event.getPlayer())) {
+        if (DownedManager.isIncapacitated(event.getPlayer())) {
             event.setCanceled(true);
         }
     }
 
-    private static <E extends ICancellableEvent> void cancelIfDowned(Player player, E event) {
-        if (DownedManager.isDowned(player)) {
+    private static <E extends ICancellableEvent> void cancelIfIncapacitated(Player player, E event) {
+        if (DownedManager.isIncapacitated(player)) {
             event.setCanceled(true);
         }
     }

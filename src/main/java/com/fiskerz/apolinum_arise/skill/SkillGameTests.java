@@ -101,6 +101,34 @@ public class SkillGameTests {
         helper.succeed();
     }
 
+    // Phase 10a bugfix regression: infected-side access is granted at a Blood Moon and used to persist
+    // forever, so a player moved back to healthy/incubating by /infection set kept a stale infectedAccess
+    // and the skill GUI still opened for them. Leaving the infected side must now revoke it - while NOT
+    // touching a legitimately book-earned healthy access.
+    @GameTest(template = "empty_3x3", batch = "skill_access")
+    public static void leaving_infected_side_revokes_stale_access(GameTestHelper helper) {
+        Player player = helper.makeMockPlayer(GameType.SURVIVAL);
+
+        // Infected + a Blood Moon: exactly what onBloodMoonStart does per infected player.
+        player.setData(InfectionAttachments.INFECTION, InfectionData.NONE.becomeInfected());
+        player.setData(SkillAttachments.SKILL_ACCESS, SkillAccessData.NONE);
+        SkillLogic.grantInfectedAccess(player);
+        helper.assertTrue(SkillLogic.hasAnyAccess(player), "Infected player has access after a Blood Moon");
+
+        // /infection set <player> healthy - the state change setHealthy/setIncubating now perform.
+        player.setData(InfectionAttachments.INFECTION, InfectionData.NONE);
+        SkillLogic.onNoLongerInfected(player);
+        helper.assertFalse(SkillLogic.hasInfectedAccess(player), "Infected-side access revoked on leaving the infected side");
+        helper.assertFalse(SkillLogic.hasAnyAccess(player),
+                "A player back to healthy with no book must not be able to open the skill GUI");
+
+        // The healthy side is earned separately (a book) and must survive the same transition untouched.
+        player.setData(SkillAttachments.SKILL_ACCESS, SkillAccessData.NONE.grantHealthy());
+        SkillLogic.onNoLongerInfected(player);
+        helper.assertTrue(SkillLogic.hasHealthyAccess(player), "Book-earned healthy access is not revoked by this path");
+        helper.succeed();
+    }
+
     // Item 3: the two components of shrine book placement - (a) the skill book is accepted into an empty
     // lectern via the vanilla tag-gated API, and (b) the shrine-gating correctly rejects a lectern that
     // is not inside a shrine. The full integration (a real shrine containing a lectern) needs shipped

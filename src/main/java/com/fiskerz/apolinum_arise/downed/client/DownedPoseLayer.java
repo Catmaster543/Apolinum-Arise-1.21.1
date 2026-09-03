@@ -1,7 +1,5 @@
 package com.fiskerz.apolinum_arise.downed.client;
 
-import com.fiskerz.apolinum_arise.downed.DownedAttachments;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -37,9 +35,10 @@ public class DownedPoseLayer extends RenderLayer<AbstractClientPlayer, PlayerMod
     @Override
     public void render(PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, AbstractClientPlayer player,
                        float limbSwing, float limbSwingAmount, float partialTick, float ageInTicks, float netHeadYaw, float headPitch) {
-        boolean downed = player.getData(DownedAttachments.DOWNED).downed();
+        // Downed (Phase 7) or passed out from exhaustion (Phase 10a) - the same laid-out body either way.
+        boolean incapacitated = IncapacitatedRender.active(player);
         boolean preview = isPreviewedLocalPlayer(player);
-        if (!downed && !preview) {
+        if (!incapacitated && !preview) {
             return;
         }
         PlayerModel<AbstractClientPlayer> model = getParentModel();
@@ -47,7 +46,7 @@ public class DownedPoseLayer extends RenderLayer<AbstractClientPlayer, PlayerMod
         if (player.isInvisible()) {
             return;
         }
-        int variant = preview ? DownedPoses.previewVariant() : player.getData(DownedAttachments.DOWNED).poseVariant();
+        int variant = preview ? DownedPoses.previewVariant() : IncapacitatedRender.poseVariant(player);
         DownedPose pose = DownedPoses.get(variant);
 
         applyPose(model, pose);
