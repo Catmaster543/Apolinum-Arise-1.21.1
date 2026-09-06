@@ -1,0 +1,21 @@
+{
+  "anchor": {
+    "type": "structure",
+    "structure": "apolinumarise:awakening_shrine",
+    "searchChunkRadius": 8,
+    "fallbackToPlayer": true
+  },
+  "waypoints": [
+    { "offset": [0, 12, -14], "yaw": 0,   "pitch": 25, "durationTicks": 0,  "easing": "linear" },
+    { "offset": [0, 6, -6],   "yaw": 0,   "pitch": 15, "durationTicks": 80, "easing": "ease_in_out" },
+    { "offset": [10, 5, 0],   "yaw": 90,  "pitch": 10, "durationTicks": 80, "easing": "ease_in_out" },
+    { "offset": [0, 18, 0],   "yaw": 180, "pitch": 80, "durationTicks": 60, "easing": "ease_out" }
+  ],
+  "subtitles": [
+    { "atTick": 10,  "durationTicks": 60, "translate": "dream.apolinumarise.test.line1" },
+    { "atTick": 110, "durationTicks": 60, "translate": "dream.apolinumarise.test.line2" }
+  ],
+  "sounds": [
+    { "atTick": 0, "sound": "minecraft:ambient.cave", "volume": 1.0, "pitch": 0.8 }
+  ]
+}

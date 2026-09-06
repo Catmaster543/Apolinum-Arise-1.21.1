@@ -208,3 +208,28 @@ idea {
         downloadJavadoc = true
     }
 }
+
+// ---------------------------------------------------------------- FTB Quests (Phase 11a)
+// FTB publish to their OWN maven; Curse Maven explicitly does not host these mods due to their
+// sharing restrictions, so Curse coordinates are deliberately not used here.
+repositories {
+    maven {
+        name = 'FTB'
+        url = 'https://maven.ftb.dev/releases'
+        content { includeGroup('dev.ftb.mods') }
+    }
+    maven {
+        name = 'Architectury'
+        url = 'https://maven.architectury.dev/'
+        content { includeGroup('dev.architectury') }
+    }
+}
+
+dependencies {
+    // FTB Quests' own neoforge.mods.toml declares these as REQUIRED: architectury, ftblibrary, ftbteams.
+    // ftbteams in particular is not optional - FTB Quests cannot run without it (see Phase 11a findings).
+    implementation "dev.ftb.mods:ftb-quests-neoforge:${ftb_quests_version}"
+    implementation "dev.ftb.mods:ftb-library-neoforge:${ftb_library_version}"
+    implementation "dev.ftb.mods:ftb-teams-neoforge:${ftb_teams_version}"
+    implementation "dev.architectury:architectury-neoforge:${architectury_version}"
+}

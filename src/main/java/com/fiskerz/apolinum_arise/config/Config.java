@@ -395,6 +395,33 @@ public class Config {
                     "while the drain keeps running, so at the defaults a pass-out lasts about 78 seconds.")
             .defineInRange("sleepPassOutExitThreshold", 5.0D, 0.0D, 100.0D);
 
+    // --- Dream system (Phase 10b) ---
+
+    public static final ModConfigSpec.IntValue DREAM_INITIAL_DELAY_MIN_SECONDS = BUILDER
+            .comment("Minimum wait, in seconds, after lying down before the first queued dream starts.",
+                    "Getting out of bed during this wait cancels the attempt without consuming the queue.")
+            .defineInRange("dreamInitialDelayMinSeconds", 30, 0, 100000);
+
+    public static final ModConfigSpec.IntValue DREAM_INITIAL_DELAY_MAX_SECONDS = BUILDER
+            .comment("Maximum wait, in seconds, before a queued dream starts. The actual delay is rolled",
+                    "uniformly between the min and this.")
+            .defineInRange("dreamInitialDelayMaxSeconds", 120, 0, 100000);
+
+    public static final ModConfigSpec.DoubleValue DREAM_CHAIN_IMMEDIATE_CHANCE = BUILDER
+            .comment("When a dream ends with more still queued and the player is still in bed, the chance the",
+                    "next one chains immediately. On failure another random delay is rolled instead.")
+            .defineInRange("dreamChainImmediateChance", 0.5D, 0.0D, 1.0D);
+
+    // --- FTB Quests integration (Phase 11a) ---
+
+    public static final ModConfigSpec.ConfigValue<String> QUEST_VISIBILITY_GATE_ID = BUILDER
+            .comment("Hex id of the FTB Quests \"gate\" quest our code completes/resets per player to control what",
+                    "quest content they can see. Author the quest in the in-game editor, copy its id (the 16-digit",
+                    "hex code string shown in the editor, e.g. 3A7F10C2B4D5E608) and paste it here.",
+                    "Empty = no gate wired. NOTE: ids are assigned at creation - deleting and re-making the quest",
+                    "produces a new id and this value must be re-pasted.")
+            .define("questVisibilityGateId", "");
+
     /** Per-day mole chance for a symptom day number (6..10); returns 0 for days 1-5 or out-of-range. */
     public static double getMoleChanceForDay(int dayNumber) {
         List<? extends Double> table = MOLE_CHANCE_PER_DAY.get();

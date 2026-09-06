@@ -96,6 +96,15 @@ Example mod description.
     ordering="AFTER"
     side="BOTH"
 
+# FTB Quests integration (Phase 11a). OPTIONAL so the mod still loads without it; ordering=AFTER so
+# FTB Quests is constructed before us and its RewardTypes registry is ready when we register into it.
+[[dependencies.${mod_id}]]
+    modId="ftbquests"
+    type="optional"
+    versionRange="[2101.1.0,)"
+    ordering="AFTER"
+    side="BOTH"
+
 # Features are specific properties of the game environment, that you may want to declare you require. This example declares
 # that your mod requires GL version 3.2 or higher. Other features will be added. They are side aware so declaring this won't
 # stop your mod loading on the server for example.

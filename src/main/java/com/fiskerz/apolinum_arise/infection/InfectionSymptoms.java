@@ -487,6 +487,8 @@ public final class InfectionSymptoms {
         // completion counter (may unlock the healthy skill system) and clear this player's healthy-side
         // access (mutual exclusivity - they are now on the infected side).
         com.fiskerz.apolinum_arise.skill.SkillLogic.onIncubationComplete(player);
+        // Phase 10b: becoming infected is a category change - collect any INFECTED broadcasts now.
+        com.fiskerz.apolinum_arise.dream.DreamManager.onCategoryChanged(player);
     }
 
     // Per-tick infected mechanics: sun ignition (any time) + Overworld-night buffs (on refresh cadence).
@@ -563,6 +565,9 @@ public final class InfectionSymptoms {
         // Leaving the infected side must also drop infected-side skill access, or the persisted flag would
         // keep the skill GUI open for a player whose unlock condition no longer holds (Phase 10a bugfix).
         com.fiskerz.apolinum_arise.skill.SkillLogic.onNoLongerInfected(player);
+        // Phase 10b: leaving the infected side is a category change (the future "cure" point) - collect
+        // any HEALTHY broadcasts issued while they were infected.
+        com.fiskerz.apolinum_arise.dream.DreamManager.onCategoryChanged(player);
         resetRuntime(player, false);
     }
 
@@ -590,6 +595,9 @@ public final class InfectionSymptoms {
         clearInfectedEffects(player);
         // Incubating is not infected either, so the same stale-access clear applies (Phase 10a bugfix).
         com.fiskerz.apolinum_arise.skill.SkillLogic.onNoLongerInfected(player);
+        // Phase 10b: leaving the infected side is a category change (the future "cure" point) - collect
+        // any HEALTHY broadcasts issued while they were infected.
+        com.fiskerz.apolinum_arise.dream.DreamManager.onCategoryChanged(player);
         resetRuntime(player, true);
     }
 

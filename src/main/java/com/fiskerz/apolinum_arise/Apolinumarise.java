@@ -9,12 +9,17 @@ import com.fiskerz.apolinum_arise.bloodmoon.BloodMoonEvents;
 import com.fiskerz.apolinum_arise.config.Config;
 import com.fiskerz.apolinum_arise.downed.DownedAttachments;
 import com.fiskerz.apolinum_arise.downed.DownedEvents;
+import com.fiskerz.apolinum_arise.dream.DreamAttachments;
+import com.fiskerz.apolinum_arise.dream.DreamEvents;
+import com.fiskerz.apolinum_arise.dream.DreamRegistry;
 import com.fiskerz.apolinum_arise.infection.InfectionAttachments;
 import com.fiskerz.apolinum_arise.infection.InfectionEvents;
 import com.fiskerz.apolinum_arise.infection.InfectionMenus;
 import com.fiskerz.apolinum_arise.infection.SymptomAttachments;
 import com.fiskerz.apolinum_arise.mosquito.MosquitoEntity;
 import com.fiskerz.apolinum_arise.network.ModNetworking;
+import com.fiskerz.apolinum_arise.quests.ApolinumQuests;
+import com.fiskerz.apolinum_arise.quests.QuestDebugCommand;
 import com.fiskerz.apolinum_arise.skill.ShrineBookInserter;
 import com.fiskerz.apolinum_arise.skill.SkillAttachments;
 import com.fiskerz.apolinum_arise.skill.SkillRegistry;
@@ -53,6 +58,10 @@ public class Apolinumarise {
         SkillRegistry.register(modEventBus);
         SkillAttachments.register(modEventBus);
         SleepAttachments.register(modEventBus);
+        DreamAttachments.register(modEventBus);
+        DreamRegistry.register(modEventBus);
+        // Phase 11a: FTB Quests integration. No-op (and never touches FTB classes) when it is absent.
+        ApolinumQuests.init();
         modEventBus.addListener(ModNetworking::register);
         modEventBus.addListener(Apolinumarise::addCreative);
         modEventBus.addListener(Apolinumarise::onEntityAttributeCreation);
@@ -90,6 +99,12 @@ public class Apolinumarise {
         NeoForge.EVENT_BUS.addListener(DownedEvents::onEntityInteract);
         NeoForge.EVENT_BUS.addListener(DownedEvents::onLeftClickBlock);
         NeoForge.EVENT_BUS.addListener(DownedEvents::onBlockBreak);
+
+        // Phase 10b dream system (server-side listeners).
+        NeoForge.EVENT_BUS.addListener(DreamEvents::onAddReloadListener);
+        NeoForge.EVENT_BUS.addListener(DreamEvents::onServerTick);
+        NeoForge.EVENT_BUS.addListener(DreamEvents::onPlayerLoggedIn);
+        NeoForge.EVENT_BUS.addListener(DreamEvents::onPlayerLoggedOut);
 
         // Phase 10a sleep bar / pass-out (server-side listeners).
         NeoForge.EVENT_BUS.addListener(SleepEvents::onServerTick);
@@ -146,6 +161,10 @@ public class Apolinumarise {
 
     private static void onRegisterCommands(RegisterCommandsEvent event) {
         BloodMoonEvents.onRegisterCommands(event);
+        com.fiskerz.apolinum_arise.dream.DreamCommands.register(event.getDispatcher());
+        if (ApolinumQuests.isQuestsLoaded()) {
+            QuestDebugCommand.register(event.getDispatcher());
+        }
     }
 
     private static void onLevelLoad(net.neoforged.neoforge.event.level.LevelEvent.Load event) {

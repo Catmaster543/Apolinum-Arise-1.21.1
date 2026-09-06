@@ -15,10 +15,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.Structure;
-import net.minecraft.world.level.levelgen.structure.StructureStart;
 
 /**
  * Proximity behaviour around every generated awakening shrine (not just the one that unlocked the
@@ -83,27 +81,8 @@ public final class ShrineEffects {
      * loaded chunks, so it never forces generation. Shared by the Phase 9 book placement.
      */
     public static boolean isWithinShrine(ServerLevel level, BlockPos pos, int margin) {
-        Structure shrine = level.registryAccess().registryOrThrow(Registries.STRUCTURE).get(SHRINE);
-        if (shrine == null) {
-            return false;
-        }
-        int centerChunkX = pos.getX() >> 4;
-        int centerChunkZ = pos.getZ() >> 4;
-        // The 3x3 chunk neighbourhood covers the margin even at chunk edges.
-        for (int dx = -1; dx <= 1; dx++) {
-            for (int dz = -1; dz <= 1; dz++) {
-                int chunkX = centerChunkX + dx;
-                int chunkZ = centerChunkZ + dz;
-                if (!level.hasChunk(chunkX, chunkZ)) {
-                    continue;
-                }
-                for (StructureStart start : level.structureManager().startsForStructure(new ChunkPos(chunkX, chunkZ), candidate -> candidate == shrine)) {
-                    if (start.isValid() && start.getBoundingBox().inflatedBy(margin).isInside(pos)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
+        // Phase 10b: the generic form of this scan now lives in StructureLocator so the dream system
+        // can anchor to any structure type; this keeps the shrine-specific entry point unchanged.
+        return com.fiskerz.apolinum_arise.util.StructureLocator.isWithin(level, SHRINE, pos, margin);
     }
 }

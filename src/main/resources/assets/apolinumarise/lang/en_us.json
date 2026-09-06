@@ -25,6 +25,12 @@
   "message.apolinumarise.infection.status.infected": "Infected",
   "message.apolinumarise.infection.set": "Set %s to %s",
   "message.apolinumarise.skill.book_used": "The knowledge settles in. Your skills are open to you.",
+  "message.apolinumarise.dream.incoming": "You have an idea to sleep on...",
+  "dream.apolinumarise.test.line1": "Something is calling from below...",
+  "dream.apolinumarise.test.line2": "...and it knows your name.",
+
+  "ftbquests.reward.apolinumarise.play_dream": "Play Dream",
+  "ftbquests.reward.apolinumarise.play_dream.dream_id": "Dream ID",
   "container.apolinumarise.restricted_inventory": "Inventory",
 
   "key.categories.apolinumarise": "Apolinum - arise!",

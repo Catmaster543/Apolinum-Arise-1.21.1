@@ -1,6 +1,7 @@
 package com.fiskerz.apolinum_arise;
 
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.NoopRenderer;
 import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.client.resources.PlayerSkin;
 import net.minecraft.resources.ResourceLocation;
@@ -29,6 +30,8 @@ import com.fiskerz.apolinum_arise.downed.client.DownedKeybinds;
 import com.fiskerz.apolinum_arise.downed.client.DownedPoseCommand;
 import com.fiskerz.apolinum_arise.downed.client.DownedPoseLayer;
 import com.fiskerz.apolinum_arise.downed.client.DownedPoses;
+import com.fiskerz.apolinum_arise.dream.DreamRegistry;
+import com.fiskerz.apolinum_arise.dream.client.DreamClientEvents;
 import com.fiskerz.apolinum_arise.infection.InfectionMenus;
 import com.fiskerz.apolinum_arise.infection.client.BiteBarHud;
 import com.fiskerz.apolinum_arise.infection.client.InfectionClientEvents;
@@ -73,10 +76,15 @@ public class ApolinumariseClient {
         NeoForge.EVENT_BUS.addListener(DownedClientEvents::onRenderPlayerPre);
         // Live pose-tuning tool for the downed poses (client-side command).
         NeoForge.EVENT_BUS.addListener(DownedPoseCommand::register);
+        // Phase 10b: input is locked for as long as the view is attached to a dream camera.
+        NeoForge.EVENT_BUS.addListener(DreamClientEvents::onMovementInput);
+        NeoForge.EVENT_BUS.addListener(DreamClientEvents::onInteractionKey);
     }
 
     private static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {
         event.registerEntityRenderer(BloodMoonRegistry.MOSQUITO.get(), MosquitoRenderer::new);
+        // The dream camera is never drawn - it only exists so the client can attach its view to it.
+        event.registerEntityRenderer(DreamRegistry.DREAM_CAMERA.get(), NoopRenderer::new);
     }
 
     // Phase 8/10a: the two status bars, drawn just above the vanilla food bar (StatusBarLayout offsets them
