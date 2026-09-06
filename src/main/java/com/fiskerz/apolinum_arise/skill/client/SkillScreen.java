@@ -18,14 +18,19 @@ import net.minecraft.resources.ResourceLocation;
 public class SkillScreen extends Screen {
     private static final ResourceLocation BACKGROUND =
             ResourceLocation.fromNamespaceAndPath(Apolinumarise.MODID, "textures/gui/skill_panel.png");
-    private static final int PANEL_WIDTH = 176;
-    private static final int PANEL_HEIGHT = 166;
+    protected static final int PANEL_WIDTH = 176;
+    protected static final int PANEL_HEIGHT = 166;
 
-    private int leftPos;
-    private int topPos;
+    protected int leftPos;
+    protected int topPos;
 
     public SkillScreen() {
-        super(Component.translatable("screen.apolinumarise.skills"));
+        this(Component.translatable("screen.apolinumarise.skills"));
+    }
+
+    /** For subclasses that reuse this shell with their own title - see the branch-choice screen. */
+    protected SkillScreen(Component title) {
+        super(title);
     }
 
     @Override
@@ -37,8 +42,13 @@ public class SkillScreen extends Screen {
     @Override
     public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
         this.renderBackground(guiGraphics, mouseX, mouseY, partialTick);
-        guiGraphics.blit(BACKGROUND, leftPos, topPos, 0.0F, 0.0F, PANEL_WIDTH, PANEL_HEIGHT, PANEL_WIDTH, PANEL_HEIGHT);
+        renderPanel(guiGraphics);
         super.render(guiGraphics, mouseX, mouseY, partialTick);
+    }
+
+    /** The shell itself, so subclasses get the identical backdrop without repeating the blit. */
+    protected void renderPanel(GuiGraphics guiGraphics) {
+        guiGraphics.blit(BACKGROUND, leftPos, topPos, 0.0F, 0.0F, PANEL_WIDTH, PANEL_HEIGHT, PANEL_WIDTH, PANEL_HEIGHT);
     }
 
     @Override

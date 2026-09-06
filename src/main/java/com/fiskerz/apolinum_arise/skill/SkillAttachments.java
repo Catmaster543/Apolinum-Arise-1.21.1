@@ -25,6 +25,18 @@ public final class SkillAttachments {
                     .copyOnDeath()
                     .build());
 
+    // The permanent Phase 11 choices (infected variant, healthy stats, healthy branch). Same three
+    // properties as the access flags and for the same reasons - persisted, kept through death, and mirrored
+    // to the owning client, which is what lets the skill button route to the branch-choice screen or
+    // straight to the quest book without a round trip. Separate from SKILL_ACCESS because access is
+    // granted and revoked as players change sides, while none of this is ever unwritten.
+    public static final Supplier<AttachmentType<SkillProfileData>> SKILL_PROFILE = ATTACHMENT_TYPES.register("skill_profile",
+            () -> AttachmentType.builder(() -> SkillProfileData.NONE)
+                    .serialize(SkillProfileData.CODEC)
+                    .sync((holder, receiver) -> holder == receiver, SkillProfileData.STREAM_CODEC)
+                    .copyOnDeath()
+                    .build());
+
     public static void register(IEventBus modEventBus) {
         ATTACHMENT_TYPES.register(modEventBus);
     }

@@ -25,5 +25,8 @@ public final class ModNetworking {
         // Client -> server: single-press bite attempt on a downed healthy target (Phase 8).
         registrar.playToServer(BiteAttemptPayload.TYPE, BiteAttemptPayload.STREAM_CODEC,
             BiteAttemptHandler::handle);
+        // Client -> server: the healthy player's one-time branch choice (Phase 11).
+        registrar.playToServer(ChooseBranchPayload.TYPE, ChooseBranchPayload.STREAM_CODEC,
+            ChooseBranchHandler::handle);
     }
 }

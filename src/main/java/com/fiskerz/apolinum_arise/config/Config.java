@@ -422,6 +422,75 @@ public class Config {
                     "produces a new id and this value must be re-pasted.")
             .define("questVisibilityGateId", "");
 
+    // --- Infected variants & healthy stats/branches (Phase 11) ---
+    //
+    // Quest ids are stored as the 16-digit HEX "code string" the FTB Quests editor shows and copies,
+    // exactly like questVisibilityGateId above - that is the form a user actually has in hand. An empty
+    // entry parses to FTB's invalid id 0L, which every consumer treats as "not wired yet", so the
+    // shipped defaults are inert until real content exists and the ids are pasted in.
+
+    public static final ModConfigSpec.ConfigValue<List<? extends Double>> INFECTED_VARIANT_WEIGHTS = BUILDER
+            .comment("Relative weights for the three infected variants (3 entries, indexed 0..2), rolled once",
+                    "when a player is granted infected-side access. Equal by default. A weight of 0 disables",
+                    "that variant; if every weight is 0 the roll falls back to a uniform pick.")
+            .defineList("infectedVariantWeights", () -> List.of(1.0D, 1.0D, 1.0D),
+                    value -> value instanceof Double weight && weight >= 0.0D);
+
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> INFECTED_VARIANT_DREAM_IDS = BUILDER
+            .comment("Dream script id queued for each infected variant (3 entries, indexed 0..2) at the moment",
+                    "the variant is assigned. A dream id is the file name, minus .json, of a script under",
+                    "data/<namespace>/dreams/. PLACEHOLDER DEFAULTS: these scripts do not exist yet, so the",
+                    "queued dream is skipped with a warning until the real reveal dreams are authored.",
+                    "An empty entry queues nothing at all.")
+            .defineList("infectedVariantDreamIds",
+                    () -> List.of("variant_reveal_0", "variant_reveal_1", "variant_reveal_2"),
+                    value -> value instanceof String);
+
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> INFECTED_VARIANT_GATE_QUEST_IDS = BUILDER
+            .comment("Hex ids of the FTB Quests \"gate\" quest for each infected variant (3 entries, indexed 0..2).",
+                    "When a player is assigned variant N we force-complete entry N for that player alone, which",
+                    "reveals everything depending on it - their variant's chapter. The other two are never",
+                    "touched, so those chapters stay permanently hidden for them with no explicit lock needed.",
+                    "Author each gate quest in the in-game editor, copy its 16-digit hex id and paste it here.",
+                    "DEFAULT IS EMPTY = the invalid id 0L: no gate is completed and nothing is revealed.")
+            .defineList("infectedVariantGateQuestIds", () -> List.of("", "", ""),
+                    value -> value instanceof String);
+
+    public static final ModConfigSpec.IntValue HEALTHY_STAT_MIN = BUILDER
+            .comment("Low end (inclusive) of the independent roll for each of the three healthy-side stats",
+                    "(Intelligence, Strength, Creativity), made once when the book grants healthy-side access.")
+            .defineInRange("healthyStatMin", 1, 0, 1_000_000);
+
+    public static final ModConfigSpec.IntValue HEALTHY_STAT_MAX = BUILDER
+            .comment("High end (inclusive) of each healthy-side stat roll. Values below healthyStatMin are",
+                    "clamped up to it at roll time, so a misconfigured pair degrades to a fixed value.")
+            .defineInRange("healthyStatMax", 10, 0, 1_000_000);
+
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> HEALTHY_BRANCH_GATE_QUEST_IDS = BUILDER
+            .comment("Hex ids of the FTB Quests \"gate\" quest for each healthy branch (4 entries, indexed 0..3).",
+                    "Completed for that player alone when they pick the branch, exactly as the variant gates are.",
+                    "DEFAULT IS EMPTY = the invalid id 0L: no gate is completed and nothing is revealed.")
+            .defineList("healthyBranchGateQuestIds", () -> List.of("", "", "", ""),
+                    value -> value instanceof String);
+
+    public static final ModConfigSpec.ConfigValue<List<? extends String>> HEALTHY_BRANCH_STAT_PREFERENCES = BUILDER
+            .comment("The two stats each healthy branch favours (4 entries, indexed 0..3), shown on the branch",
+                    "buttons so a player can weigh their rolled stats against the options. Format per entry:",
+                    "\"STAT:DIRECTION,STAT:DIRECTION\" where STAT is INTELLIGENCE, STRENGTH or CREATIVITY and",
+                    "DIRECTION is HIGH or LOW. These are advisory labels only - nothing enforces them.")
+            .defineList("healthyBranchStatPreferences", () -> List.of(
+                            "INTELLIGENCE:HIGH,CREATIVITY:HIGH",
+                            "STRENGTH:HIGH,INTELLIGENCE:LOW",
+                            "CREATIVITY:HIGH,STRENGTH:LOW",
+                            "INTELLIGENCE:HIGH,STRENGTH:HIGH"),
+                    value -> value instanceof String);
+
+    /** One entry of a 3- or 4-wide indexed list config; empty string when the index is out of range. */
+    public static String getIndexed(ModConfigSpec.ConfigValue<List<? extends String>> list, int index) {
+        List<? extends String> values = list.get();
+        return index >= 0 && index < values.size() ? values.get(index) : "";
+    }
+
     /** Per-day mole chance for a symptom day number (6..10); returns 0 for days 1-5 or out-of-range. */
     public static double getMoleChanceForDay(int dayNumber) {
         List<? extends Double> table = MOLE_CHANCE_PER_DAY.get();

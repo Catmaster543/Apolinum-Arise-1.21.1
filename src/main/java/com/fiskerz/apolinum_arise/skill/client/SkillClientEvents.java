@@ -4,9 +4,11 @@ import com.fiskerz.apolinum_arise.Apolinumarise;
 import com.fiskerz.apolinum_arise.infection.InfectionAttachments;
 import com.fiskerz.apolinum_arise.infection.InfectionData;
 import com.fiskerz.apolinum_arise.infection.client.RestrictedInventoryScreen;
+import com.fiskerz.apolinum_arise.quests.client.QuestBookOpener;
 import com.fiskerz.apolinum_arise.skill.SkillAccessData;
 import com.fiskerz.apolinum_arise.skill.SkillAttachments;
 import com.fiskerz.apolinum_arise.skill.SkillLogic;
+import com.fiskerz.apolinum_arise.skill.SkillProfileData;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.Screen;
@@ -94,8 +96,19 @@ public final class SkillClientEvents {
         }
     }
 
-    // Silent no-op when locked. When unlocked, setScreen replaces whatever is open (closing the
-    // inventory container via its removal) with the skill panel.
+    /**
+     * Where the skill button and the K key actually go (Phase 11 item 5). Three destinations:
+     *
+     * <ul>
+     *   <li><b>Infected with access:</b> straight into FTB Quests' own book. No chapter navigation of our
+     *       own - the book lists only the chapters visible to this player's team data, and their variant's
+     *       gate is the only one we completed, so it already shows them their variant and nothing else.</li>
+     *   <li><b>Healthy with access, no branch chosen:</b> the one-time branch-choice screen.</li>
+     *   <li><b>Healthy with access, branch chosen:</b> the book, same as the infected side.</li>
+     * </ul>
+     *
+     * With neither side unlocked this stays the completely silent no-op it has always been.
+     */
     private static void openSkills() {
         Minecraft minecraft = Minecraft.getInstance();
         LocalPlayer player = minecraft.player;
@@ -106,6 +119,17 @@ public final class SkillClientEvents {
         if (!SkillLogic.hasAnyAccess(player)) {
             return;
         }
+        if (SkillLogic.needsBranchChoice(player)) {
+            minecraft.setScreen(new BranchChoiceScreen());
+            return;
+        }
+        if (QuestBookOpener.open()) {
+            return;
+        }
+        // FTB Quests missing, or its file has not synced yet. Fall back to the empty Phase 9 shell rather
+        // than swallowing the keypress, so the button still visibly does something.
+        Apolinumarise.LOGGER.debug("[Skill] Falling back to the plain skill panel - the quest book was "
+                + "unavailable.");
         minecraft.setScreen(new SkillScreen());
     }
 
@@ -122,9 +146,12 @@ public final class SkillClientEvents {
         }
         SkillAccessData access = player.getData(SkillAttachments.SKILL_ACCESS);
         InfectionData infection = player.getData(InfectionAttachments.INFECTION);
+        SkillProfileData profile = player.getData(SkillAttachments.SKILL_PROFILE);
         Apolinumarise.LOGGER.debug("[Skill] access check ({}): healthyAccess={} infectedAccess={} -> hasAny={} "
-                        + "| infection: infected={} incubating={}",
+                        + "| infection: infected={} incubating={} | profile: variant={} branch={} "
+                        + "stats={}/{}/{} (assigned={})",
                 where, access.healthyAccess(), access.infectedAccess(), access.hasAny(),
-                infection.infected(), infection.incubating());
+                infection.infected(), infection.incubating(), profile.infectedVariant(), profile.healthyBranch(),
+                profile.intelligence(), profile.strength(), profile.creativity(), profile.statsAssigned());
     }
 }

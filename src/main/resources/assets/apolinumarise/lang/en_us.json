@@ -25,6 +25,7 @@
   "message.apolinumarise.infection.status.infected": "Infected",
   "message.apolinumarise.infection.set": "Set %s to %s",
   "message.apolinumarise.skill.book_used": "The knowledge settles in. Your skills are open to you.",
+  "message.apolinumarise.skill.branch_chosen": "You have committed to %s. There is no going back.",
   "message.apolinumarise.dream.incoming": "You have an idea to sleep on...",
   "dream.apolinumarise.test.line1": "Something is calling from below...",
   "dream.apolinumarise.test.line2": "...and it knows your name.",
@@ -38,7 +39,23 @@
   "key.apolinumarise.open_skills": "Open Skills",
   "item.apolinumarise.skill_book": "Forbidden Tome",
   "screen.apolinumarise.skills": "Skills",
+  "screen.apolinumarise.branch_choice": "Choose Your Path",
   "gui.apolinumarise.skills": "Skills",
+
+  "gui.apolinumarise.stat.intelligence": "Intelligence",
+  "gui.apolinumarise.stat.strength": "Strength",
+  "gui.apolinumarise.stat.creativity": "Creativity",
+  "gui.apolinumarise.stat.line": "%s: %s",
+
+  "gui.apolinumarise.branch.title": "Choose Your Path",
+  "gui.apolinumarise.branch.prompt": "This choice is permanent.",
+  "gui.apolinumarise.branch.pref.high": "high %s",
+  "gui.apolinumarise.branch.pref.low": "low %s",
+  "gui.apolinumarise.branch.pref.none": "no stated preference",
+  "gui.apolinumarise.branch.0": "Branch I",
+  "gui.apolinumarise.branch.1": "Branch II",
+  "gui.apolinumarise.branch.2": "Branch III",
+  "gui.apolinumarise.branch.3": "Branch IV",
   "hud.apolinumarise.revive_prompt": "Hold %s to revive",
   "hud.apolinumarise.bite_prompt": "Press %s to bite",
 
@@ -120,5 +137,12 @@
   "apolinumarise.configuration.sleepBarDayOrBloodMoonRefillMultiplier": "Sleep: Day / Blood Moon Refill Multiplier",
   "apolinumarise.configuration.sleepZeroSlownessDays": "Sleep: Days at 0% Before Slowness",
   "apolinumarise.configuration.sleepZeroPassOutDays": "Sleep: Days at 0% Before Pass-Out",
-  "apolinumarise.configuration.sleepPassOutExitThreshold": "Sleep: Pass-Out Exit Threshold (%)"
+  "apolinumarise.configuration.sleepPassOutExitThreshold": "Sleep: Pass-Out Exit Threshold (%)",
+  "apolinumarise.configuration.infectedVariantWeights": "Infected: Variant Weights (0-2)",
+  "apolinumarise.configuration.infectedVariantDreamIds": "Infected: Variant Reveal Dream IDs (0-2)",
+  "apolinumarise.configuration.infectedVariantGateQuestIds": "Infected: Variant Gate Quest IDs (0-2)",
+  "apolinumarise.configuration.healthyStatMin": "Healthy: Stat Roll Minimum",
+  "apolinumarise.configuration.healthyStatMax": "Healthy: Stat Roll Maximum",
+  "apolinumarise.configuration.healthyBranchGateQuestIds": "Healthy: Branch Gate Quest IDs (0-3)",
+  "apolinumarise.configuration.healthyBranchStatPreferences": "Healthy: Branch Stat Preferences (0-3)"
 }

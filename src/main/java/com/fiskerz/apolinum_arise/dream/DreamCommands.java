@@ -41,6 +41,11 @@ public final class DreamCommands {
                                 .then(Commands.argument("dreamId", StringArgumentType.word())
                                         .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DreamScripts.INSTANCE.ids(), builder))
                                         .executes(DreamCommands::broadcast))))
+                .then(Commands.literal("peek")
+                        .then(Commands.argument("chunkX", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+                                .then(Commands.argument("chunkZ", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
+                                        .executes(DreamCommands::peek))))
+                .then(Commands.literal("unpeek").executes(DreamCommands::unpeek))
                 .then(Commands.literal("now").executes(DreamCommands::now))
                 .then(Commands.literal("stop").executes(DreamCommands::stop)));
     }
@@ -87,6 +92,33 @@ public final class DreamCommands {
         context.getSource().sendSuccess(() -> Component.literal(
                 "Broadcast '" + dreamId + "' to " + category + " permanently. Anyone who is ever in that "
                         + "category - including future joiners - will receive it once."), true);
+        return 1;
+    }
+
+    // Phase 10c two-player test: stream a distant chunk area to the SENDER only, while their body
+    // stays exactly where it is. A second player standing next to them must notice nothing.
+    private static int peek(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        ServerPlayer player = context.getSource().getPlayerOrException();
+        int chunkX = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(context, "chunkX");
+        int chunkZ = com.mojang.brigadier.arguments.IntegerArgumentType.getInteger(context, "chunkZ");
+        net.minecraft.world.level.ChunkPos target = new net.minecraft.world.level.ChunkPos(chunkX, chunkZ);
+        long start = System.currentTimeMillis();
+        DreamChunkLoader.begin(player, context.getSource().getLevel(), target);
+        long elapsed = System.currentTimeMillis() - start;
+        context.getSource().sendSuccess(() -> Component.literal(String.format(
+                "Streamed %d chunk(s) around %s to you only, in %d ms (generation included). "
+                        + "Your body has not moved: you are still at %s. Use /dream unpeek to restore.",
+                DreamChunkLoader.heldChunkCount(player), target, elapsed, player.chunkPosition())), true);
+        return 1;
+    }
+
+    private static int unpeek(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        ServerPlayer player = context.getSource().getPlayerOrException();
+        int held = DreamChunkLoader.heldChunkCount(player);
+        DreamChunkLoader.end(player);
+        context.getSource().sendSuccess(() -> Component.literal(
+                "Released " + held + " ticket(s) and restored your own view. Held now: "
+                        + DreamChunkLoader.heldChunkCount(player)), true);
         return 1;
     }
 

@@ -162,6 +162,7 @@ public class Apolinumarise {
     private static void onRegisterCommands(RegisterCommandsEvent event) {
         BloodMoonEvents.onRegisterCommands(event);
         com.fiskerz.apolinum_arise.dream.DreamCommands.register(event.getDispatcher());
+        com.fiskerz.apolinum_arise.skill.SkillCommands.register(event.getDispatcher());
         if (ApolinumQuests.isQuestsLoaded()) {
             QuestDebugCommand.register(event.getDispatcher());
         }

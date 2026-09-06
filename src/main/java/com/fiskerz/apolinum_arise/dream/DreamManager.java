@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.fiskerz.apolinum_arise.Apolinumarise;
 import com.fiskerz.apolinum_arise.config.Config;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetCameraPacket;
@@ -24,6 +25,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -131,6 +133,9 @@ public final class DreamManager {
 
     public static void onLogout(ServerPlayer player) {
         stop(player, false);
+        // stop() returns early when there is no playback, so release any chunk session (e.g. a
+        // /dream peek left open) unconditionally - otherwise its tickets would outlive the player.
+        DreamChunkLoader.end(player);
         PENDING_DELAY.remove(player.getUUID());
     }
 
@@ -164,17 +169,22 @@ public final class DreamManager {
         }
 
         if (!player.isSleeping()) {
-            // Getting up cancels a pending attempt WITHOUT touching the queue.
-            PENDING_DELAY.remove(uuid);
+            // Getting up cancels a pending attempt WITHOUT touching the queue - and drops the chunks that
+            // were being warmed for the dream that is now not going to happen.
+            clearPending(player);
             return;
         }
         if (!player.getData(DreamAttachments.DREAMS).hasQueued()) {
-            PENDING_DELAY.remove(uuid);
+            clearPending(player);
             return;
         }
         Integer remaining = PENDING_DELAY.get(uuid);
         if (remaining == null) {
             PENDING_DELAY.put(uuid, randomDelayTicks(player));
+            // Phase 11 item 1: start loading the dream's terrain NOW, at the head of the 30-120 second
+            // wait, so the ~1-2 s of pop-in happens while the player is still lying there with nothing to
+            // see. Tickets only - the pre-warm sends the client nothing, so their own surroundings stay put.
+            prewarmNextDream(player);
             return;
         }
         if (remaining > 1) {
@@ -183,6 +193,37 @@ public final class DreamManager {
         }
         PENDING_DELAY.remove(uuid);
         start(player);
+    }
+
+    /** Forget a pending attempt and release anything that was being pre-warmed for it. */
+    private static void clearPending(ServerPlayer player) {
+        if (PENDING_DELAY.remove(player.getUUID()) != null) {
+            DreamChunkLoader.cancelPrewarm(player);
+        }
+    }
+
+    /**
+     * Resolve where the NEXT queued dream will open and start loading that area, without popping the queue
+     * and without sending the client anything. Best-effort: an unknown script or an anchor that cannot be
+     * resolved yet simply means no pre-warm, and {@link #start} handles it exactly as it always did.
+     */
+    private static void prewarmNextDream(ServerPlayer player) {
+        if (!(player.level() instanceof ServerLevel level)) {
+            return;
+        }
+        DreamData data = player.getData(DreamAttachments.DREAMS);
+        if (!data.hasQueued()) {
+            return;
+        }
+        startPosOf(player, level, data.queue().get(0)).ifPresent(startPos ->
+                DreamChunkLoader.prewarm(player, level, new ChunkPos(BlockPos.containing(startPos))));
+    }
+
+    /** Where a dream's camera will sit on its first tick: the resolved anchor plus the first waypoint. */
+    private static Optional<Vec3> startPosOf(ServerPlayer player, ServerLevel level, String dreamId) {
+        return DreamScripts.INSTANCE.get(dreamId)
+                .flatMap(script -> script.anchor().resolve(level, player)
+                        .map(origin -> origin.add(script.waypoints().get(0).offset())));
     }
 
     private static int randomDelayTicks(ServerPlayer player) {
@@ -226,6 +267,10 @@ public final class DreamManager {
         level.addFreshEntity(camera);
 
         // The vanilla camera-attachment packet, sent directly - see the class javadoc for why not setCamera.
+        // Phase 10c: force-load and stream the dream terrain to this player before the view moves there,
+        // so the camera never looks at unloaded void.
+        DreamChunkLoader.begin(player, level, new ChunkPos(
+                BlockPos.containing(startPos)));
         player.connection.send(new ClientboundSetCameraPacket(camera));
 
         PLAYING.put(player.getUUID(), new Playback(script.get(), camera, origin.get()));
@@ -240,6 +285,11 @@ public final class DreamManager {
         // Camera position/rotation for this tick.
         Pose pose = poseAt(script, playback.origin, tick);
         playback.camera.moveTo(pose.position.x, pose.position.y, pose.position.z, pose.yaw, pose.pitch);
+        // Keep the streamed window with the camera as it travels.
+        DreamChunkLoader.follow(player, new ChunkPos(
+                BlockPos.containing(pose.position)));
+        // Ship out whatever finished generating since last tick (loading is asynchronous by design).
+        DreamChunkLoader.pump(player);
 
         for (DreamScript.Subtitle subtitle : script.subtitles()) {
             if (subtitle.atTick() == tick) {
@@ -322,6 +372,9 @@ public final class DreamManager {
         }
         // Hand the view back to the player's own body.
         player.connection.send(new ClientboundSetCameraPacket(player));
+        // Release tickets, forget the streamed chunks, and restore this client to its own surroundings.
+        // Runs on BOTH the natural end and every interruption, since every path funnels through stop().
+        DreamChunkLoader.end(player);
         playback.camera.discard();
 
         if (!considerChaining || !player.isSleeping()
@@ -333,7 +386,9 @@ public final class DreamManager {
         if (player.getRandom().nextDouble() < Config.DREAM_CHAIN_IMMEDIATE_CHANCE.get()) {
             start(player); // chains straight into the next one
         } else {
+            // Another wait, so pre-warm the next one through it exactly as the first wait did.
             PENDING_DELAY.put(player.getUUID(), randomDelayTicks(player));
+            prewarmNextDream(player);
         }
     }
 

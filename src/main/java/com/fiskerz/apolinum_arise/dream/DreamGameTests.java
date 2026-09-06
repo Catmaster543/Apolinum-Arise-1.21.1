@@ -8,7 +8,12 @@ import com.google.gson.JsonObject;
 
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameType;
@@ -129,6 +134,90 @@ public class DreamGameTests {
                 "Linear easing is halfway across at the halfway tick, got " + middle.position().x);
         helper.assertTrue(Math.abs(end.position().x - (origin.x + 10.0D)) < 0.001D,
                 "Ends on the final waypoint, got " + end.position().x);
+        helper.succeed();
+    }
+
+    // Phase 10c item 1: a region ticket keeps an arbitrary chunk loaded, and asking for a chunk that
+    // has never existed GENERATES it on demand. Also measures the synchronous cost of that generation.
+    @GameTest(template = "empty_3x3", batch = "dream_chunks", timeoutTicks = 600)
+    public static void region_ticket_forces_and_generates_a_remote_chunk(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        // Far enough from the test area to be well outside any player/spawn tracking.
+        ChunkPos here = new ChunkPos(helper.absolutePos(BlockPos.ZERO));
+        ChunkPos remote = new ChunkPos(here.x + 600, here.z + 600);
+
+        helper.assertTrue(level.getChunkSource().getChunkNow(remote.x, remote.z) == null,
+                "The remote chunk must not already be loaded");
+
+        long start = System.currentTimeMillis();
+        level.getChunkSource().addRegionTicket(DreamChunkLoader.ticketTypeForTest(), remote, 2, remote);
+        LevelChunk generated = level.getChunk(remote.x, remote.z);
+        long elapsedMs = System.currentTimeMillis() - start;
+
+        helper.assertTrue(generated != null, "getChunk must generate the chunk on demand");
+        helper.assertTrue(level.getChunkSource().getChunkNow(remote.x, remote.z) != null,
+                "The ticket must keep it loaded afterwards");
+        Apolinumarise.LOGGER.info("[DreamChunks][test] Forced + generated {} in {} ms.", remote, elapsedMs);
+
+        // Releasing the ticket must not throw and must leave no ticket of ours behind.
+        level.getChunkSource().removeRegionTicket(DreamChunkLoader.ticketTypeForTest(), remote, 2, remote);
+        helper.succeed();
+    }
+
+    // Phase 11 item 1: the pre-warm phase holds the dream's chunks WITHOUT sending the client anything, so
+    // generation happens during the lie-down wait instead of after the camera has moved. The distinction
+    // matters: a client has one chunk window, so sending during the wait would blank the player's own
+    // surroundings while they are still awake and looking at them.
+    // NOTE ON THE TEST PLAYER: this builds a ServerPlayer WITHOUT putting it in the player list, which
+    // GameTestHelper.makeMockServerPlayerInLevel would do. A listed mock player has no real client behind
+    // its embedded channel, so the first per-tick system that reads a SYNCED attachment on it crashes the
+    // server with "Payload neoforge:sync_attachments may not be sent to the client!" - which this mod does
+    // every tick. An unlisted player is enough here precisely because the pre-warm phase never touches
+    // player.connection: that is the property under test. The streaming half (begin/pump/follow, and the
+    // client-restoring half of end) does send packets and so is out of reach headlessly - it is covered by
+    // the in-game /dream peek check instead.
+    @GameTest(template = "empty_3x3", batch = "dream_chunks", timeoutTicks = 600)
+    public static void prewarm_holds_chunks_without_touching_the_client(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        ServerPlayer player = new ServerPlayer(level.getServer(), level,
+                new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(), "prewarm-test"),
+                ClientInformation.createDefault());
+        try {
+            ChunkPos here = new ChunkPos(helper.absolutePos(BlockPos.ZERO));
+            ChunkPos remote = new ChunkPos(here.x + 700, here.z + 700);
+
+            DreamChunkLoader.prewarm(player, level, remote);
+            helper.assertTrue(DreamChunkLoader.heldChunkCount(player) > 0,
+                    "Pre-warming must ticket the dream's chunks");
+            helper.assertTrue(DreamChunkLoader.isPrewarming(player), "The session is in the pre-warm phase");
+            helper.assertValueEqual(DreamChunkLoader.sentChunkCount(player), 0,
+                    "A pre-warm must not send the client a single chunk");
+
+            // Even an explicit pump stays silent while pre-warming - that is the whole guarantee, and the
+            // reason the player's own surroundings survive the 30-120 second wait.
+            DreamChunkLoader.pump(player);
+            helper.assertValueEqual(DreamChunkLoader.sentChunkCount(player), 0,
+                    "pump() during a pre-warm must still send nothing");
+
+            // Re-warming the same area is idempotent: no ticket churn while the delay ticks down.
+            int held = DreamChunkLoader.heldChunkCount(player);
+            DreamChunkLoader.prewarm(player, level, remote);
+            helper.assertValueEqual(DreamChunkLoader.heldChunkCount(player), held,
+                    "Re-warming the same centre must not re-ticket");
+
+            // Standing up mid-wait releases everything, leaving no client-visible trace to undo.
+            DreamChunkLoader.cancelPrewarm(player);
+            helper.assertValueEqual(DreamChunkLoader.heldChunkCount(player), 0, "Cancelling releases every ticket");
+            helper.assertFalse(DreamChunkLoader.isActive(player), "No session survives a cancel");
+
+            // And a pre-warm torn down by the generic path (logout, /dream stop) leaks nothing either.
+            DreamChunkLoader.prewarm(player, level, remote);
+            DreamChunkLoader.end(player);
+            helper.assertValueEqual(DreamChunkLoader.heldChunkCount(player), 0, "Ending releases every ticket");
+        } finally {
+            DreamChunkLoader.end(player);
+            player.discard();
+        }
         helper.succeed();
     }
 

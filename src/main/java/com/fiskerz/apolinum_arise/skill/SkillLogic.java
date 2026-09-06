@@ -1,7 +1,9 @@
 package com.fiskerz.apolinum_arise.skill;
 
 import com.fiskerz.apolinum_arise.Apolinumarise;
+import com.fiskerz.apolinum_arise.config.Config;
 import com.fiskerz.apolinum_arise.infection.InfectionLogic;
+import com.fiskerz.apolinum_arise.quests.QuestGates;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -33,7 +35,13 @@ public final class SkillLogic {
     // (Player, not ServerPlayer, so gametests can drive them with mock players - the same pattern
     // InfectionLogic uses. Callers always pass a server-side player.)
 
-    /** Grants healthy-side access if not already held. Returns true if it was newly granted. */
+    /**
+     * Grants healthy-side access if not already held. Returns true if it was newly granted.
+     *
+     * <p>Phase 11: this is also the moment the three healthy stats are rolled. Deliberately in here rather
+     * than in {@link SkillBookItem}, so the roll can never drift away from the grant - every path that
+     * opens the healthy side rolls stats, by construction.
+     */
     public static boolean grantHealthyAccess(Player player) {
         SkillAccessData data = player.getData(SkillAttachments.SKILL_ACCESS);
         if (data.healthyAccess()) {
@@ -41,10 +49,17 @@ public final class SkillLogic {
         }
         player.setData(SkillAttachments.SKILL_ACCESS, data.grantHealthy());
         Apolinumarise.LOGGER.debug("[Skill] Granted healthy-side access to {}.", player.getGameProfile().getName());
+        HealthyStats.assignOnAccessGranted(player);
         return true;
     }
 
-    /** Grants infected-side access if not already held. Returns true if it was newly granted. */
+    /**
+     * Grants infected-side access if not already held. Returns true if it was newly granted.
+     *
+     * <p>Phase 11: this is also the moment the infected variant is assigned, its reveal dream queued, and
+     * its quest gate opened - see {@link InfectedVariants#assignOnAccessGranted}. Same reasoning as the
+     * healthy stats above: the assignment lives with the grant so the two can never happen apart.
+     */
     public static boolean grantInfectedAccess(Player player) {
         SkillAccessData data = player.getData(SkillAttachments.SKILL_ACCESS);
         if (data.infectedAccess()) {
@@ -52,6 +67,53 @@ public final class SkillLogic {
         }
         player.setData(SkillAttachments.SKILL_ACCESS, data.grantInfected());
         Apolinumarise.LOGGER.debug("[Skill] Granted infected-side access to {}.", player.getGameProfile().getName());
+        InfectedVariants.assignOnAccessGranted(player);
+        return true;
+    }
+
+    // ---------------------------------------------------------------- Phase 11 profile
+
+    public static SkillProfileData profile(Player player) {
+        return player.getData(SkillAttachments.SKILL_PROFILE);
+    }
+
+    /** True when a healthy-side player still owes us their one-time branch choice. */
+    public static boolean needsBranchChoice(Player player) {
+        return hasHealthyAccess(player) && !profile(player).hasHealthyBranch();
+    }
+
+    /**
+     * Record the player's permanent branch choice and open that branch's quest gate for them alone.
+     * Server-authoritative and strictly one-shot: an out-of-range index, a player without healthy-side
+     * access, or a player who already chose is rejected without changing anything. Returns true only when
+     * the choice was actually stored.
+     */
+    public static boolean chooseHealthyBranch(Player player, int branch) {
+        if (!HealthyBranches.isValidIndex(branch)) {
+            Apolinumarise.LOGGER.warn("[Skill] {} tried to choose branch {}, which is out of range 0..{}.",
+                    player.getGameProfile().getName(), branch, HealthyBranches.COUNT - 1);
+            return false;
+        }
+        if (!hasHealthyAccess(player)) {
+            Apolinumarise.LOGGER.warn("[Skill] {} tried to choose a branch without healthy-side access.",
+                    player.getGameProfile().getName());
+            return false;
+        }
+        SkillProfileData data = profile(player);
+        if (data.hasHealthyBranch()) {
+            Apolinumarise.LOGGER.debug("[Skill] {} already chose branch {} - the choice is permanent, ignoring {}.",
+                    player.getGameProfile().getName(), data.healthyBranch(), branch);
+            return false;
+        }
+        player.setData(SkillAttachments.SKILL_PROFILE, data.withHealthyBranch(branch));
+        Apolinumarise.LOGGER.info("[Skill] {} chose healthy branch {} (permanent).",
+                player.getGameProfile().getName(), branch);
+        // Same mechanism as the infected variants: complete this branch's gate only, and never touch the
+        // other three - leaving them incomplete is what keeps their chapters hidden.
+        if (player instanceof ServerPlayer serverPlayer) {
+            QuestGates.completeGate(serverPlayer,
+                    Config.getIndexed(Config.HEALTHY_BRANCH_GATE_QUEST_IDS, branch), "healthy branch " + branch);
+        }
         return true;
     }
 
