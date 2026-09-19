@@ -91,8 +91,10 @@ public final class SkillCommands {
         player.setData(SkillAttachments.SKILL_PROFILE, SkillProfileData.NONE);
         context.getSource().sendSuccess(() -> Component.literal(
                 "Cleared " + player.getGameProfile().getName() + "'s variant, stats and branch. Access flags "
-                        + "are untouched - use /infection set and a Blood Moon to re-trigger the infected "
-                        + "assignment, or re-use a book for the healthy one."), true);
+                        + "are untouched - the infected assignment re-runs at the next Blood Moon while "
+                        + "infected, and the branch choice on their next skill-screen open.\n"
+                        + "NOTE: this does NOT un-complete their quest gates, so previously revealed chapters "
+                        + "stay visible. Use /apolinumquests resetgates for a fully ungated state."), true);
         return 1;
     }
 

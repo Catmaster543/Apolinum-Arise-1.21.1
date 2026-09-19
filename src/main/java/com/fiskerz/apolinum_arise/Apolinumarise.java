@@ -145,6 +145,9 @@ public class Apolinumarise {
 
     private static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
         BloodMoonEvents.onPlayerLoggedIn(event);
+        if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player) {
+            com.fiskerz.apolinum_arise.skill.SkillLogic.onLogin(player);
+        }
     }
 
     private static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {

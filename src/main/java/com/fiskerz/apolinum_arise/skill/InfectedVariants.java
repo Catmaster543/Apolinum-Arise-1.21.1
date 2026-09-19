@@ -5,7 +5,7 @@ import java.util.List;
 import com.fiskerz.apolinum_arise.Apolinumarise;
 import com.fiskerz.apolinum_arise.config.Config;
 import com.fiskerz.apolinum_arise.dream.DreamManager;
-import com.fiskerz.apolinum_arise.quests.QuestGates;
+
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
@@ -62,7 +62,7 @@ public final class InfectedVariants {
         }
 
         if (player instanceof ServerPlayer serverPlayer) {
-            QuestGates.completeGate(serverPlayer,
+            SkillLogic.openGateFor(serverPlayer,
                     Config.getIndexed(Config.INFECTED_VARIANT_GATE_QUEST_IDS, variant),
                     "infected variant " + variant);
         }

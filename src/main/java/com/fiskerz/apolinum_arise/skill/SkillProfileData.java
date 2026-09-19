@@ -82,6 +82,15 @@ public record SkillProfileData(int infectedVariant, boolean statsAssigned, int i
         return new SkillProfileData(infectedVariant, statsAssigned, intelligence, strength, creativity, branch);
     }
 
+    /**
+     * Drop the two one-shot assignments so they can be made again, keeping the rolled stats. Used by the
+     * debug reset alongside un-completing that player's quest gates: clearing the gates without clearing
+     * these would leave a player who is locked out of content but can never be re-assigned to any.
+     */
+    public SkillProfileData withoutAssignments() {
+        return new SkillProfileData(UNASSIGNED, statsAssigned, intelligence, strength, creativity, UNASSIGNED);
+    }
+
     /** Read one stat by its enum, so screens and tooltips can iterate instead of switching. */
     public int stat(HealthyStat stat) {
         return switch (stat) {

@@ -5,6 +5,8 @@ import com.fiskerz.apolinum_arise.config.Config;
 import com.fiskerz.apolinum_arise.infection.InfectionLogic;
 import com.fiskerz.apolinum_arise.quests.QuestGates;
 
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
@@ -111,10 +113,27 @@ public final class SkillLogic {
         // Same mechanism as the infected variants: complete this branch's gate only, and never touch the
         // other three - leaving them incomplete is what keeps their chapters hidden.
         if (player instanceof ServerPlayer serverPlayer) {
-            QuestGates.completeGate(serverPlayer,
-                    Config.getIndexed(Config.HEALTHY_BRANCH_GATE_QUEST_IDS, branch), "healthy branch " + branch);
+            openGateFor(serverPlayer, Config.getIndexed(Config.HEALTHY_BRANCH_GATE_QUEST_IDS, branch),
+                    "healthy branch " + branch);
         }
         return true;
+    }
+
+    /**
+     * Open one gate and, when it does not open, SAY SO to the player who just earned it.
+     *
+     * <p>This exists because the failure used to be invisible. A branch choice stored the branch, told the
+     * player "you have committed to Branch I - there is no going back", and then quietly failed to reveal
+     * anything because the configured id pointed at a quest that had been deleted and re-made. The
+     * assignment is still correct and still permanent in that case - only the quest content is missing - so
+     * the right response is to tell them rather than to roll the choice back.
+     */
+    static void openGateFor(ServerPlayer player, String gateCodeString, String what) {
+        QuestGates.GateResult result = QuestGates.completeGate(player, gateCodeString, what);
+        if (!result.opened()) {
+            player.sendSystemMessage(Component.literal("[Apolinum] " + result.explain(what))
+                    .withStyle(ChatFormatting.RED));
+        }
     }
 
     // ---------------------------------------------------------------- mutual exclusivity
@@ -181,7 +200,36 @@ public final class SkillLogic {
         for (ServerPlayer player : overworld.getServer().getPlayerList().getPlayers()) {
             if (InfectionLogic.isInfected(player)) {
                 grantInfectedAccess(player);
+                // Backfill, deliberately outside the grant. grantInfectedAccess returns false when the
+                // player ALREADY holds access, and would then skip the assignment entirely - which strands
+                // anyone whose access predates Phase 11, or whose variant a debug reset has cleared. The
+                // assignment is idempotent, so running it every Blood Moon is free for everyone else.
+                InfectedVariants.assignOnAccessGranted(player);
             }
         }
+    }
+
+    /**
+     * Same backfill for the healthy side: a player whose access predates Phase 11 has no rolled stats, and
+     * the branch-choice screen would show them three zeroes. Cheap enough to check on every login, and a
+     * no-op the moment they have been rolled once.
+     */
+    public static void onLogin(ServerPlayer player) {
+        if (hasHealthyAccess(player) && !profile(player).statsAssigned()) {
+            Apolinumarise.LOGGER.info("[Skill] {} holds healthy access with no rolled stats - backfilling.",
+                    player.getGameProfile().getName());
+            HealthyStats.assignOnAccessGranted(player);
+        }
+    }
+
+    /**
+     * Debug reset: forget this player's variant and branch so the normal assignment triggers can run again.
+     * Their rolled stats and their access flags are left alone - access is what makes the triggers fire at
+     * all, and re-rolling stats would change a number the player may already have seen.
+     */
+    public static void resetAssignments(ServerPlayer player) {
+        player.setData(SkillAttachments.SKILL_PROFILE, profile(player).withoutAssignments());
+        Apolinumarise.LOGGER.info("[Skill] Cleared {}'s variant and branch assignments.",
+                player.getGameProfile().getName());
     }
 }

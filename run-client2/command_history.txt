@@ -10,3 +10,16 @@
 /tp Dev2 Dev
 /bloodmoon force stop
 /time set night
+/infection set Dev healthy
+/infection set Dev infected
+/infection set Dev healthy
+/infection set Dev infected
+/infection set Dev healthy
+/infection set Dev infected
+/give Dev2 apolinumarise:skill_book
+/apolinumquests testchain create
+/give Dev2 apolinumarise:skill_book
+/apolinumquests testchain remove
+/apolinumquests resetgates
+/apolinumquests testchain create
+/give Dev2 apolinumarise:skill_book
