@@ -1,9 +1,11 @@
 package com.fiskerz.apolinum_arise.dream;
 
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -46,23 +48,32 @@ public final class DreamManager {
 
     private static final int TICKS_PER_SECOND = 20;
     private static final String ACTIONBAR_KEY = "message.apolinumarise.dream.incoming";
+    /** Phase 13: sent once when a player's dream queue goes from empty to having something in it. */
+    private static final String WORTH_A_NAP_KEY = "message.apolinumarise.dream.worth_a_nap";
 
     // Transient per-player runtime; never persisted (a pending delay should not survive a relog).
     private static final Map<UUID, Playback> PLAYING = new ConcurrentHashMap<>();
     private static final Map<UUID, Integer> PENDING_DELAY = new ConcurrentHashMap<>();
 
     private static final class Playback {
+        final String dreamId;
         final DreamScript script;
         final DreamCameraEntity camera;
         final Vec3 origin;
         final int totalTicks;
         int tick;
 
-        Playback(DreamScript script, DreamCameraEntity camera, Vec3 origin) {
+        Playback(String dreamId, DreamScript script, DreamCameraEntity camera, Vec3 origin) {
+            this.dreamId = dreamId;
             this.script = script;
             this.camera = camera;
             this.origin = origin;
             this.totalTicks = script.totalTicks();
+        }
+
+        /** True once playback has run past its final tick - i.e. the dream was WATCHED, not interrupted. */
+        boolean completed() {
+            return tick > totalTicks;
         }
     }
 
@@ -74,9 +85,35 @@ public final class DreamManager {
             return;
         }
         DreamData data = player.getData(DreamAttachments.DREAMS);
+        boolean wasEmpty = data.queue().isEmpty();
         player.setData(DreamAttachments.DREAMS, data.withQueued(dreamId));
         Apolinumarise.LOGGER.debug("[Dream] Queued '{}' for {} (queue size now {}).",
                 dreamId, player.getGameProfile().getName(), data.queue().size() + 1);
+        notifyIfQueueWoke(player, wasEmpty);
+    }
+
+    /**
+     * Tell the player they have something worth sleeping for, but only on the EMPTY -> NON-EMPTY edge.
+     *
+     * <p>Keying on the transition rather than on each addition is what makes this fire once when several
+     * dreams land together - a variant-assignment dream plus a broadcast catching up, say. The first
+     * addition takes the queue off empty and speaks; everything after it finds a queue that was already
+     * non-empty and stays quiet. A player who works through their queue and is later given another dream
+     * gets told again, which is the same rule, not an exception to it.
+     *
+     * <p>Chat rather than the actionbar on purpose: the actionbar is gone in a few seconds and a player
+     * given a dream mid-fight would simply never see it, whereas chat survives in the scrollback.
+     */
+    private static void notifyIfQueueWoke(Player player, boolean wasEmptyBefore) {
+        if (!wasEmptyBefore || !(player instanceof ServerPlayer serverPlayer)) {
+            return;
+        }
+        if (!player.getData(DreamAttachments.DREAMS).hasQueued()) {
+            return; // nothing actually landed
+        }
+        serverPlayer.sendSystemMessage(Component.translatable(WORTH_A_NAP_KEY));
+        Apolinumarise.LOGGER.debug("[Dream] Told {} their queue is worth sleeping on.",
+                player.getGameProfile().getName());
     }
 
     /**
@@ -106,6 +143,9 @@ public final class DreamManager {
         }
         DreamCategory category = DreamCategory.of(player);
         DreamData data = player.getData(DreamAttachments.DREAMS);
+        // Captured before the loop, not inside it: a login catch-up can deliver several broadcasts at
+        // once, and they are one event as far as the player is concerned.
+        boolean wasEmpty = data.queue().isEmpty();
         boolean changed = false;
 
         for (DreamBroadcasts.Entry entry : DreamBroadcasts.get(level).entries()) {
@@ -119,7 +159,47 @@ public final class DreamManager {
         }
         if (changed) {
             player.setData(DreamAttachments.DREAMS, data);
+            notifyIfQueueWoke(player, wasEmpty);
         }
+    }
+
+    // ---------------------------------------------------------------- watched history (Phase 12)
+
+    /**
+     * Whether this player has ever watched {@code dreamId} through to the end. The query ability unlock
+     * conditions are built on - see {@code UnlockCondition.DreamWatched}.
+     */
+    public static boolean hasWatched(Player player, String dreamId) {
+        return player.getData(DreamAttachments.DREAMS).hasWatched(dreamId);
+    }
+
+    /**
+     * Record a dream as watched. Called by {@link #stop} when playback ran to completion, and by the debug
+     * command so a prerequisite can be satisfied without sitting through a dream.
+     */
+    public static boolean markWatched(Player player, String dreamId) {
+        DreamData data = player.getData(DreamAttachments.DREAMS);
+        DreamData next = data.withWatched(dreamId);
+        if (next == data) {
+            return false;
+        }
+        player.setData(DreamAttachments.DREAMS, next);
+        Apolinumarise.LOGGER.info("[Dream] {} has now watched '{}'.",
+                player.getGameProfile().getName(), dreamId);
+        return true;
+    }
+
+    /** Debug only: forget that a dream was watched, so a prerequisite can be re-tested from unmet. */
+    public static boolean unmarkWatched(Player player, String dreamId) {
+        DreamData data = player.getData(DreamAttachments.DREAMS);
+        if (!data.hasWatched(dreamId)) {
+            return false;
+        }
+        Set<String> remaining = new LinkedHashSet<>(data.watched());
+        remaining.remove(dreamId);
+        player.setData(DreamAttachments.DREAMS,
+                new DreamData(data.queue(), data.receivedBroadcasts(), Set.copyOf(remaining)));
+        return true;
     }
 
     /** Category-change entry point (infection completion / cure). */
@@ -273,7 +353,7 @@ public final class DreamManager {
                 BlockPos.containing(startPos)));
         player.connection.send(new ClientboundSetCameraPacket(camera));
 
-        PLAYING.put(player.getUUID(), new Playback(script.get(), camera, origin.get()));
+        PLAYING.put(player.getUUID(), new Playback(dreamId, script.get(), camera, origin.get()));
         Apolinumarise.LOGGER.info("[Dream] Playing '{}' for {} ({} ticks, anchor {}).",
                 dreamId, player.getGameProfile().getName(), script.get().totalTicks(), origin.get());
     }
@@ -369,6 +449,16 @@ public final class DreamManager {
         Playback playback = PLAYING.remove(player.getUUID());
         if (playback == null) {
             return;
+        }
+        // Phase 12: record the dream as WATCHED, but only if playback actually reached its end. Every
+        // interruption funnels through this same method, so `considerChaining` cannot be used to tell them
+        // apart - the tick counter can. A dream that was cut short is consumed but not watched, so an
+        // ability prerequisite hanging off it stays unmet until the player is given the dream again.
+        if (playback.completed()) {
+            markWatched(player, playback.dreamId);
+        } else {
+            Apolinumarise.LOGGER.debug("[Dream] '{}' ended early for {} at tick {}/{} - not counted as watched.",
+                    playback.dreamId, player.getGameProfile().getName(), playback.tick, playback.totalTicks);
         }
         // Hand the view back to the player's own body.
         player.connection.send(new ClientboundSetCameraPacket(player));

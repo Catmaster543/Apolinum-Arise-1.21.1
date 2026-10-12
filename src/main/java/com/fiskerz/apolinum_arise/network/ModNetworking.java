@@ -28,5 +28,9 @@ public final class ModNetworking {
         // Client -> server: the healthy player's one-time branch choice (Phase 11).
         registrar.playToServer(ChooseBranchPayload.TYPE, ChooseBranchPayload.STREAM_CODEC,
             ChooseBranchHandler::handle);
+        // Client -> server: raw attack-key hold state, the one thing the server cannot observe itself
+        // (Phase 13). Carries no target and no progress - see AttackHeldPayload.
+        registrar.playToServer(AttackHeldPayload.TYPE, AttackHeldPayload.STREAM_CODEC,
+            AttackHeldHandler::handle);
     }
 }

@@ -22,6 +22,7 @@ import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
+import com.fiskerz.apolinum_arise.ability.client.StrongPunchClientEvents;
 import com.fiskerz.apolinum_arise.bloodmoon.BloodMoonRegistry;
 import com.fiskerz.apolinum_arise.bloodmoon.client.BloodMoonClientEvents;
 import com.fiskerz.apolinum_arise.bloodmoon.client.BloodMoonClientState;
@@ -79,6 +80,9 @@ public class ApolinumariseClient {
         // Phase 10b: input is locked for as long as the view is attached to a dream camera.
         NeoForge.EVENT_BUS.addListener(DreamClientEvents::onMovementInput);
         NeoForge.EVENT_BUS.addListener(DreamClientEvents::onInteractionKey);
+        // Phase 13: report the raw attack-key state so the server can run a held-input charge. Only sends
+        // while the local player actually has Strong Punch and an empty hand - see the class javadoc.
+        NeoForge.EVENT_BUS.addListener(StrongPunchClientEvents::onClientTickPost);
     }
 
     private static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/handheld",
+  "textures": {
+    "layer0": "apolinumarise:item/hive_mind_stick"
+  }
+}

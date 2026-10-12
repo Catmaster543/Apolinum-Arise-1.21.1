@@ -1,13 +1,13 @@
-[19záø2026 23:37:38.410] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeclientdev, --version, 21.1.238, --assetIndex, 17, --assetsDir, C:\\Users\\maste\\.gradle\\caches\\neoformruntime\\assets, --gameDir, ., --fml.fmlVersion, 4.0.43, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.238, --fml.neoFormVersion, 20240808.144430, --username, Dev2]
-[19záø2026 23:37:38.412] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: JVM identified as Eclipse Adoptium OpenJDK 64-Bit Server VM 21.0.10+7-LTS
-[19záø2026 23:37:38.413] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.10 by Eclipse Adoptium; OS Windows 11 arch amd64 version 10.0
-[19záø2026 23:37:38.523] [main/INFO] [net.neoforged.fml.loading.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
-[19záø2026 23:37:38.649] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
-[19záø2026 23:37:38.780] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.6 got version 4.6
-[19záø2026 23:37:38.890] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/C:/Users/maste/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%23138!/ Service=ModLauncher Env=CLIENT
-[19záø2026 23:37:38.979] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: NVIDIA GeForce RTX 4060/PCIe/SSE2 GL version 4.6.0 NVIDIA 616.92, NVIDIA Corporation
-[19záø2026 23:37:39.439] [main/INFO] [net.neoforged.fml.loading.moddiscovery.locators.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
-[19záø2026 23:37:39.441] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/]: 
+[28záø2026 14:39:00.728] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher running: args [--launchTarget, forgeclientdev, --version, 21.1.238, --assetIndex, 17, --assetsDir, C:\\Users\\maste\\.gradle\\caches\\neoformruntime\\assets, --gameDir, ., --fml.fmlVersion, 4.0.43, --fml.mcVersion, 1.21.1, --fml.neoForgeVersion, 21.1.238, --fml.neoFormVersion, 20240808.144430, --username, Dev2]
+[28záø2026 14:39:00.737] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: JVM identified as Eclipse Adoptium OpenJDK 64-Bit Server VM 21.0.10+7-LTS
+[28záø2026 14:39:00.739] [main/INFO] [cpw.mods.modlauncher.Launcher/MODLAUNCHER]: ModLauncher 11.0.5+main.901c6ea8 starting: java version 21.0.10 by Eclipse Adoptium; OS Windows 11 arch amd64 version 10.0
+[28záø2026 14:39:00.883] [main/INFO] [net.neoforged.fml.loading.ImmediateWindowHandler/]: Loading ImmediateWindowProvider fmlearlywindow
+[28záø2026 14:39:01.025] [main/INFO] [EARLYDISPLAY/]: Trying GL version 4.6
+[28záø2026 14:39:01.360] [main/INFO] [EARLYDISPLAY/]: Requested GL version 4.6 got version 4.6
+[28záø2026 14:39:01.508] [main/INFO] [mixin/]: SpongePowered MIXIN Subsystem Version=0.8.7 Source=union:/C:/Users/maste/.gradle/caches/modules-2/files-2.1/net.fabricmc/sponge-mixin/0.15.2+mixin.0.8.7/2af2f021d8e02a0220dc27a7a72b4666d66d44ca/sponge-mixin-0.15.2+mixin.0.8.7.jar%23138!/ Service=ModLauncher Env=CLIENT
+[28záø2026 14:39:01.579] [pool-2-thread-1/INFO] [EARLYDISPLAY/]: GL info: NVIDIA GeForce RTX 4060/PCIe/SSE2 GL version 4.6.0 NVIDIA 616.92, NVIDIA Corporation
+[28záø2026 14:39:02.024] [main/INFO] [net.neoforged.fml.loading.moddiscovery.locators.JarInJarDependencyLocator/]: Found 2 dependencies adding them to mods collection
+[28záø2026 14:39:02.026] [main/INFO] [net.neoforged.fml.loading.moddiscovery.ModDiscoverer/]: 
      Mod List:
 		Name Version (Mod Id)
 
@@ -19,72 +19,140 @@
 		GeckoLib 4 4.9.2 (geckolib)
 		Minecraft 1.21.1 (minecraft)
 		NeoForge 21.1.238 (neoforge)
-[19záø2026 23:37:40.456] [main/INFO] [mixin/]: Compatibility level set to JAVA_17
-[19záø2026 23:37:40.488] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclientdev' with arguments [--version, 21.1.238, --gameDir, ., --assetsDir, C:\Users\maste\.gradle\caches\neoformruntime\assets, --assetIndex, 17, --username, Dev2]
-[19záø2026 23:37:40.608] [main/WARN] [mixin/]: Reference map 'geckolib.refmap.json' for geckolib.mixins.json could not be read. If this is a development environment you can ignore this message
-[19záø2026 23:37:41.144] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.3).
-[19záø2026 23:37:42.971] [Datafixer Bootstrap/INFO] [com.mojang.datafixers.DataFixerBuilder/]: 229 Datafixer optimizations took 323 milliseconds
-[19záø2026 23:37:48.936] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
-[19záø2026 23:37:48.938] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
-[19záø2026 23:37:48.939] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
-[19záø2026 23:37:48.940] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
-[19záø2026 23:37:48.941] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
-[19záø2026 23:37:49.033] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/maste/Desktop/Start/Projects/Apolinum%20Arise%201.21.1/build/moddev/artifacts/neoforge-21.1.238.jar%23189!/assets/.mcassetsroot' uses unexpected schema
-[19záø2026 23:37:49.033] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/maste/Desktop/Start/Projects/Apolinum%20Arise%201.21.1/build/moddev/artifacts/neoforge-21.1.238.jar%23189!/data/.mcassetsroot' uses unexpected schema
-[19záø2026 23:37:49.066] [Render thread/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
-[19záø2026 23:37:49.073] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Setting user: Dev2
-[19záø2026 23:37:49.156] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Backend library: LWJGL version 3.3.3+5
-[19záø2026 23:37:49.365] [modloading-worker-0/INFO] [net.neoforged.neoforge.common.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.238, for MC 1.21.1
-[19záø2026 23:37:49.664] [modloading-worker-0/INFO] [com.fiskerz.apolinum_arise.Apolinumarise/]: [Quests] Registered reward type apolinumarise:play_dream (Play Dream).
-[19záø2026 23:37:49.683] [modloading-worker-0/INFO] [com.fiskerz.apolinum_arise.Apolinumarise/]: Apolinum - arise! initialized
-[19záø2026 23:37:50.177] [Render thread/INFO] [net.neoforged.neoforge.gametest.GameTestHooks/]: Enabled Gametest Namespaces: []
-[19záø2026 23:37:50.333] [Render thread/INFO] [net.minecraft.server.packs.resources.ReloadableResourceManager/]: Reloading ResourceManager: vanilla, mod_resources, mod/geckolib, mod/architectury, mod/ftblibrary, mod/ftbteams, mod/ftbquests, mod/apolinumarise, mod/neoforge
-[19záø2026 23:37:50.382] [Worker-Main-4/ERROR] [dev.ftb.mods.ftblibrary.icon.EntityIconLoader/]: Missing entity icon settings for apolinumarise:mosquito
-[19záø2026 23:37:50.504] [Worker-Main-15/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_jp_patch-15.1.05.hex, loading
-[19záø2026 23:37:50.504] [Worker-Main-16/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_all_no_pua-15.1.05.hex, loading
-[19záø2026 23:37:51.840] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:item.goat_horn.play
-[19záø2026 23:37:51.841] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
-[19záø2026 23:37:51.884] [Render thread/INFO] [com.mojang.blaze3d.audio.Library/]: OpenAL initialized on device OpenAL Soft on Reproduktory (2 - Realtek(R) Audio)
-[19záø2026 23:37:51.885] [Render thread/INFO] [net.minecraft.client.sounds.SoundEngine/SOUNDS]: Sound engine started
-[19záø2026 23:37:51.957] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x4 minecraft:textures/atlas/blocks.png-atlas
-[19záø2026 23:37:51.967] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
-[19záø2026 23:37:51.967] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
-[19záø2026 23:37:51.968] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
-[19záø2026 23:37:51.969] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
-[19záø2026 23:37:51.972] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
-[19záø2026 23:37:51.972] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
-[19záø2026 23:37:51.972] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
-[19záø2026 23:37:51.973] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
-[19záø2026 23:37:52.017] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/particles.png-atlas
-[19záø2026 23:37:52.018] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
-[19záø2026 23:37:52.019] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
-[19záø2026 23:37:52.019] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
-[19záø2026 23:37:52.019] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas
-[19záø2026 23:37:52.033] [Render thread/WARN] [net.minecraft.client.renderer.ShaderInstance/]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
-[19záø2026 23:37:52.090] [Render thread/INFO] [net.neoforged.neoforge.client.entity.animation.json.AnimationLoader/]: Loaded 0 entity animations
-[19záø2026 23:38:53.728] [Render thread/INFO] [net.minecraft.client.gui.screens.ConnectScreen/]: Connecting to fe80::d8d8:af74:f3c8:2b5, 13111
-[19záø2026 23:38:54.218] [IO-Worker-1/WARN] [net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl/]: Failed to log in: Invalid session (Try restarting your game and the launcher)
-[19záø2026 23:38:55.328] [Render thread/INFO] [FTB Library/]: received server config settings for config: ftbteams-server
-[19záø2026 23:38:55.329] [Render thread/INFO] [FTB Library/]: config has been updated! server = false - clear any cached data etc. here
-[19záø2026 23:38:55.329] [Render thread/INFO] [FTB Library/]: received server config settings for config: ftblibrary-server
-[19záø2026 23:38:55.337] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Hello from FTB Library!
-[19záø2026 23:38:55.429] [Render thread/INFO] [FTB Quests/]: Read 607 bytes, 1 objects
-[19záø2026 23:38:55.469] [Render thread/INFO] [FTB Quests/]: received translation table en_us (with 1012 entries) from server
-[19záø2026 23:38:55.477] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 2 advancements
-[19záø2026 23:39:18.140] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Infected]
-[19záø2026 23:39:23.426] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set own game mode to Survival Mode]
-[19záø2026 23:39:37.136] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set own game mode to Survival Mode
-[19záø2026 23:39:45.414] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set Dev to Healthy
-[19záø2026 23:39:49.800] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set Dev to Infected
-[19záø2026 23:39:51.292] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set Dev to Infected
-[19záø2026 23:39:52.045] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set Dev to Infected
-[19záø2026 23:39:53.130] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set Dev to Healthy
-[19záø2026 23:39:54.119] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set Dev to Healthy
-[19záø2026 23:39:55.238] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set Dev to Infected
-[19záø2026 23:39:56.448] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set Dev to Healthy
-[19záø2026 23:39:57.335] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set Dev to Infected
-[19záø2026 23:40:05.467] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Gave 1 [Forbidden Tome] to Dev2
-[19záø2026 23:40:07.784] [Render thread/WARN] [net.minecraft.client.renderer.texture.TextureManager/]: Failed to load texture: apolinumarise:textures/gui/skill_panel.png
+[28záø2026 14:39:03.287] [main/INFO] [mixin/]: Compatibility level set to JAVA_17
+[28záø2026 14:39:03.307] [main/INFO] [cpw.mods.modlauncher.LaunchServiceHandler/MODLAUNCHER]: Launching target 'forgeclientdev' with arguments [--version, 21.1.238, --gameDir, ., --assetsDir, C:\Users\maste\.gradle\caches\neoformruntime\assets, --assetIndex, 17, --username, Dev2]
+[28záø2026 14:39:03.411] [main/WARN] [mixin/]: Reference map 'geckolib.refmap.json' for geckolib.mixins.json could not be read. If this is a development environment you can ignore this message
+[28záø2026 14:39:03.912] [main/INFO] [MixinExtras|Service/]: Initializing MixinExtras via com.llamalad7.mixinextras.service.MixinExtrasServiceImpl(version=0.5.3).
+[28záø2026 14:39:05.565] [Datafixer Bootstrap/INFO] [com.mojang.datafixers.DataFixerBuilder/]: 229 Datafixer optimizations took 217 milliseconds
+[28záø2026 14:39:13.281] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[28záø2026 14:39:13.283] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[28záø2026 14:39:13.285] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[28záø2026 14:39:13.286] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[28záø2026 14:39:13.288] [main/WARN] [net.minecraft.commands.Commands/]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[28záø2026 14:39:13.442] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/maste/Desktop/Start/Projects/Apolinum%20Arise%201.21.1/build/moddev/artifacts/neoforge-21.1.238.jar%23189!/assets/.mcassetsroot' uses unexpected schema
+[28záø2026 14:39:13.443] [Render thread/WARN] [net.minecraft.server.packs.VanillaPackResourcesBuilder/]: Assets URL 'union:/C:/Users/maste/Desktop/Start/Projects/Apolinum%20Arise%201.21.1/build/moddev/artifacts/neoforge-21.1.238.jar%23189!/data/.mcassetsroot' uses unexpected schema
+[28záø2026 14:39:13.483] [Render thread/INFO] [com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService/]: Environment: Environment[sessionHost=https://sessionserver.mojang.com, servicesHost=https://api.minecraftservices.com, name=PROD]
+[28záø2026 14:39:13.496] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Setting user: Dev2
+[28záø2026 14:39:13.571] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Backend library: LWJGL version 3.3.3+5
+[28záø2026 14:39:13.840] [modloading-worker-0/INFO] [net.neoforged.neoforge.common.NeoForgeMod/NEOFORGE-MOD]: NeoForge mod loading, version 21.1.238, for MC 1.21.1
+[28záø2026 14:39:14.297] [modloading-worker-0/INFO] [com.fiskerz.apolinum_arise.Apolinumarise/]: [Ability] 1 abilit(ies) registered: [infected_branch1_hivemind]
+[28záø2026 14:39:14.298] [modloading-worker-0/INFO] [com.fiskerz.apolinum_arise.Apolinumarise/]: [Quests] Registered reward type apolinumarise:play_dream (Play Dream).
+[28záø2026 14:39:14.312] [modloading-worker-0/INFO] [com.fiskerz.apolinum_arise.Apolinumarise/]: Apolinum - arise! initialized
+[28záø2026 14:39:15.065] [Render thread/INFO] [net.neoforged.neoforge.gametest.GameTestHooks/]: Enabled Gametest Namespaces: []
+[28záø2026 14:39:15.406] [Render thread/INFO] [net.minecraft.server.packs.resources.ReloadableResourceManager/]: Reloading ResourceManager: vanilla, mod_resources, mod/geckolib, mod/architectury, mod/ftblibrary, mod/ftbteams, mod/ftbquests, mod/apolinumarise, mod/neoforge
+[28záø2026 14:39:15.477] [Worker-Main-4/ERROR] [dev.ftb.mods.ftblibrary.icon.EntityIconLoader/]: Missing entity icon settings for apolinumarise:mosquito
+[28záø2026 14:39:15.691] [Worker-Main-18/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_all_no_pua-15.1.05.hex, loading
+[28záø2026 14:39:15.748] [Worker-Main-15/INFO] [net.minecraft.client.gui.font.providers.UnihexProvider/]: Found unifont_jp_patch-15.1.05.hex, loading
+[28záø2026 14:39:17.140] [Worker-Main-12/WARN] [net.minecraft.client.resources.model.ModelManager/]: Missing textures in model apolinumarise:hive_mind_stick#inventory:
+    minecraft:textures/atlas/blocks.png:apolinumarise:item/hive_mind_stick
+[28záø2026 14:39:17.566] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:item.goat_horn.play
+[28záø2026 14:39:17.566] [Render thread/WARN] [net.minecraft.client.sounds.SoundEngine/]: Missing sound for event: minecraft:entity.goat.screaming.horn_break
+[28záø2026 14:39:17.646] [Render thread/INFO] [com.mojang.blaze3d.audio.Library/]: OpenAL initialized on device OpenAL Soft on Reproduktory (2 - Realtek(R) Audio)
+[28záø2026 14:39:17.647] [Render thread/INFO] [net.minecraft.client.sounds.SoundEngine/SOUNDS]: Sound engine started
+[28záø2026 14:39:17.816] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x4 minecraft:textures/atlas/blocks.png-atlas
+[28záø2026 14:39:17.828] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/signs.png-atlas
+[28záø2026 14:39:17.828] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/banner_patterns.png-atlas
+[28záø2026 14:39:17.830] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x512x4 minecraft:textures/atlas/shield_patterns.png-atlas
+[28záø2026 14:39:17.831] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x1024x4 minecraft:textures/atlas/armor_trims.png-atlas
+[28záø2026 14:39:17.837] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x256x4 minecraft:textures/atlas/chest.png-atlas
+[28záø2026 14:39:17.838] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 128x64x4 minecraft:textures/atlas/decorated_pot.png-atlas
+[28záø2026 14:39:17.838] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/beds.png-atlas
+[28záø2026 14:39:17.839] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x4 minecraft:textures/atlas/shulker_boxes.png-atlas
+[28záø2026 14:39:17.922] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/particles.png-atlas
+[28záø2026 14:39:17.925] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 512x256x0 minecraft:textures/atlas/paintings.png-atlas
+[28záø2026 14:39:17.927] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 256x128x0 minecraft:textures/atlas/mob_effects.png-atlas
+[28záø2026 14:39:17.927] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 64x64x0 minecraft:textures/atlas/map_decorations.png-atlas
+[28záø2026 14:39:17.928] [Render thread/INFO] [net.minecraft.client.renderer.texture.TextureAtlas/]: Created: 1024x512x0 minecraft:textures/atlas/gui.png-atlas
+[28záø2026 14:39:17.958] [Render thread/WARN] [net.minecraft.client.renderer.ShaderInstance/]: Shader rendertype_entity_translucent_emissive could not find sampler named Sampler2 in the specified shader program.
+[28záø2026 14:39:18.057] [Render thread/INFO] [net.neoforged.neoforge.client.entity.animation.json.AnimationLoader/]: Loaded 0 entity animations
+[28záø2026 14:39:21.478] [Render thread/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 1297 recipes
+[28záø2026 14:39:21.642] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 1399 advancements
+[28záø2026 14:39:21.655] [Render thread/INFO] [com.fiskerz.apolinum_arise.Apolinumarise/]: [Dream] Loaded 2 dream script(s): [test_dream, hivemind_whispers]
+[28záø2026 14:39:27.230] [Render thread/INFO] [net.minecraft.world.item.crafting.RecipeManager/]: Loaded 1297 recipes
+[28záø2026 14:39:27.266] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 1399 advancements
+[28záø2026 14:39:27.268] [Render thread/INFO] [com.fiskerz.apolinum_arise.Apolinumarise/]: [Dream] Loaded 2 dream script(s): [test_dream, hivemind_whispers]
+[28záø2026 14:39:45.187] [Render thread/INFO] [net.minecraft.client.gui.screens.ConnectScreen/]: Connecting to fe80::d8d8:af74:f3c8:2b5, 5762
+[28záø2026 14:39:45.883] [IO-Worker-1/WARN] [net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl/]: Failed to log in: Invalid session (Try restarting your game and the launcher)
+[28záø2026 14:39:47.167] [Render thread/INFO] [FTB Library/]: received server config settings for config: ftbteams-server
+[28záø2026 14:39:47.168] [Render thread/INFO] [FTB Library/]: config has been updated! server = false - clear any cached data etc. here
+[28záø2026 14:39:47.168] [Render thread/INFO] [FTB Library/]: received server config settings for config: ftblibrary-server
+[28záø2026 14:39:47.181] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Hello from FTB Library!
+[28záø2026 14:39:47.330] [Render thread/INFO] [FTB Quests/]: Read 607 bytes, 1 objects
+[28záø2026 14:39:47.374] [Render thread/INFO] [FTB Quests/]: received translation table en_us (with 1012 entries) from server
+[28záø2026 14:39:47.383] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 2 advancements
+[28záø2026 14:39:47.514] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set own game mode to Creative Mode]
+[28záø2026 14:39:50.085] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set own game mode to Survival Mode]
+[28záø2026 14:40:00.630] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set own game mode to Survival Mode
+[28záø2026 14:40:18.718] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Healthy]
+[28záø2026 14:40:22.372] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Infected]
+[28záø2026 14:40:24.032] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Infected]
+[28záø2026 14:40:25.295] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Healthy]
+[28záø2026 14:40:26.497] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Infected]
+[28záø2026 14:40:27.664] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Healthy]
+[28záø2026 14:40:28.660] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Infected]
+[28záø2026 14:40:29.602] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Healthy]
+[28záø2026 14:40:30.564] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Infected]
+[28záø2026 14:40:54.441] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set the time to 13000]
+[28záø2026 14:41:09.516] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] You feel your body growing weaker - The blood moon is rising
+[28záø2026 14:41:25.467] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Created 7 gated placeholder chapters, saved the quest file, and wrote their ids into the config - no pasting needed.\nInfected Variant 0 -> 2B541F8B2A307186\nInfected Variant 1 -> 115A759683635544\nInfected Variant 2 -> 2F89BE645349F979\nHealthy Branch 0 -> 05BF78ED874AE87F\nHealthy Branch 1 -> 69FF0997A548F76A\nHealthy Branch 2 -> 0DDEA60719307B1B\nHealthy Branch 3 -> 2DD74A4620E4047B\n\ninfectedVariantGateQuestIds = ["2B541F8B2A307186", "115A759683635544", "2F89BE645349F979"]\nhealthyBranchGateQuestIds = ["05BF78ED874AE87F", "69FF0997A548F76A", "0DDEA60719307B1B", "2DD74A4620E4047B"]\nNow RECONNECT: the quest file is only synced to clients on join, so the new chapters will not appear until you do.]
+[28záø2026 14:41:42.649] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev left the game
+[28záø2026 14:41:42.978] [Render thread/WARN] [net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl/]: Client disconnected with reason: Disconnected
+[28záø2026 14:41:46.412] [Render thread/INFO] [net.minecraft.client.gui.screens.ConnectScreen/]: Connecting to fe80::d8d8:af74:f3c8:2b5, 5762
+[28záø2026 14:41:48.450] [Server Connector #2/ERROR] [net.minecraft.client.gui.screens.ConnectScreen/]: Couldn't connect to server
+io.netty.channel.AbstractChannel$AnnotatedConnectException: Connection refused: getsockopt: pc/[fe80:0:0:0:d8d8:af74:f3c8:2b5]:5762
+Caused by: java.net.ConnectException: Connection refused: getsockopt
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method) ~[?:?]
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:694) ~[?:?]
+	at java.base/sun.nio.ch.SocketChannelImpl.finishConnect(SocketChannelImpl.java:973) ~[?:?]
+	at MC-BOOTSTRAP/io.netty.transport@4.1.97.Final/io.netty.channel.socket.nio.NioSocketChannel.doFinishConnect(NioSocketChannel.java:337) ~[netty-transport-4.1.97.Final.jar%23136!/:4.1.97.Final]
+	at MC-BOOTSTRAP/io.netty.transport@4.1.97.Final/io.netty.channel.nio.AbstractNioChannel$AbstractNioUnsafe.finishConnect(AbstractNioChannel.java:334) ~[netty-transport-4.1.97.Final.jar%23136!/:4.1.97.Final]
+	at MC-BOOTSTRAP/io.netty.transport@4.1.97.Final/io.netty.channel.nio.NioEventLoop.processSelectedKey(NioEventLoop.java:776) ~[netty-transport-4.1.97.Final.jar%23136!/:4.1.97.Final]
+	at MC-BOOTSTRAP/io.netty.transport@4.1.97.Final/io.netty.channel.nio.NioEventLoop.processSelectedKeysOptimized(NioEventLoop.java:724) ~[netty-transport-4.1.97.Final.jar%23136!/:4.1.97.Final]
+	at MC-BOOTSTRAP/io.netty.transport@4.1.97.Final/io.netty.channel.nio.NioEventLoop.processSelectedKeys(NioEventLoop.java:650) ~[netty-transport-4.1.97.Final.jar%23136!/:4.1.97.Final]
+	at MC-BOOTSTRAP/io.netty.transport@4.1.97.Final/io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:562) ~[netty-transport-4.1.97.Final.jar%23136!/:4.1.97.Final]
+	at MC-BOOTSTRAP/io.netty.common@4.1.97.Final/io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:997) ~[netty-common-4.1.97.Final.jar%23131!/:4.1.97.Final]
+	at MC-BOOTSTRAP/io.netty.common@4.1.97.Final/io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74) ~[netty-common-4.1.97.Final.jar%23131!/:4.1.97.Final]
+	at java.base/java.lang.Thread.run(Thread.java:1583) ~[?:?]
+[28záø2026 14:42:15.593] [Render thread/INFO] [net.minecraft.client.gui.screens.ConnectScreen/]: Connecting to fe80::d8d8:af74:f3c8:2b5, 3571
+[28záø2026 14:42:15.824] [IO-Worker-1/WARN] [net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl/]: Failed to log in: Invalid session (Try restarting your game and the launcher)
+[28záø2026 14:42:16.131] [Render thread/WARN] [net.neoforged.fml.config.ConfigTracker/]: Overwriting non-null config LoadedConfig[config=SynchronizedConfig{DataHolder:{removeErroringBlockEntities=false, removeErroringEntities=false, fullBoundingBoxLadders=false, permissionHandler=neoforge:default_handler, advertiseDedicatedServerToLan=true}}, path=null, modConfig=net.neoforged.fml.config.ModConfig@616c9761] at path neoforge-server.toml with synced config
+[28záø2026 14:42:16.132] [Render thread/WARN] [net.neoforged.fml.config.ConfigTracker/]: Overwriting non-null config LoadedConfig[config=SynchronizedConfig{DataHolder:{enableMod=true, shrineSpawnExclusionEnabled=true, shrineSpawnExclusionDistance=3000, shrineRequireActivationCommand=false, bloodMoonBaseChance=0.01, bloodMoonChanceGrowth=1.5, bloodMoonChanceCap=1.0, mobDamageMultiplier=1.2, mobHealthMultiplier=1.2, effectRefreshIntervalTicks=100, weaknessAmplifierByPhase=[2, 1, 1, 0, 0, 0, 1, 1], miningFatigueThreshold1=50, miningFatigueThreshold2=75, miningFatigueThreshold3=90, miningFatigueAmplifier1=0, miningFatigueAmplifier2=1, miningFatigueAmplifier3=2, mosquitoWanderRadius=16, mosquitoWanderIntervalTicks=80, mosquitoHoverMinHeight=2, mosquitoHoverMaxHeight=10, mosquitoDetectionRange=70.0, mosquitoBaseDamage=3.0, mosquitoSpawnIntervalTicks=200, mosquitoSpawnBaseChance=0.02, mosquitoMaxConcurrent=6, mosquitoUndergroundSpawnWeightPercent=15, infectionChancePerBite=0.1, infectionIncubationDays=10, awakeningHealthLeft=1.0, awakeningBlindnessDurationTicks=200, awakeningBlindnessAmplifier=1, awakeningNauseaDurationTicks=600, awakeningNauseaAmplifier=2, awakeningWeaknessDurationTicks=1200, awakeningWeaknessAmplifier=0, soundFalloffDistance=100.0, soundMinVolume=0.15, symptomEarlyRollIntervalTicks=1200, symptomEarlyRollChance=0.05, symptomEarlyDurationTicks=100, symptomPoolIntervalTicks=600, symptomPoolBaseChance=0.35, symptomPoolBaseWeight=1.0, symptomPoolPoisonWeight=0.3, symptomPoolHungerWeight=0.3, symptomPoolMinDurationTicks=60, symptomPoolMaxDurationTicks=600, symptomPoolHungerDurationMultiplier=3.0, symptomPoolDay7ChanceMultiplier=2.0, symptomRefreshIntervalTicks=40, symptomSunWeaknessBaseAmplifier=0, symptomSunWeaknessPerDayIncrement=1, symptomSunMiningFatigueAmplifier=0, symptomSunBlindnessThresholdSeconds=60, symptomSunBlindnessThresholdSecondsDay10=30, symptomSunWitherAmplifier=0, moleChancePerDay=[0.75, 0.5, 0.5, 0.5, 0.7], moleBaseSizeMin=0.6, moleBaseSizeMax=1.0, moleDailyGrowthIncrement=0.15, moleGrowthMultiplierMin=1.0, moleGrowthMultiplierMax=2.0, moleCapMultiplierMin=2.3, moleCapMultiplierMax=3.7, moleDay10SizeMultiplier=2.0, downedEnabled=true, downedDurationSeconds=60, downedHealthFloor=1.0, reviveRange=3.0, reviveHoldSeconds=5.0, reviveHealthOnRevive=2.0, biteBarFillRatePercentPer20Sec=1.0, biteBarDarknessThreshold=7, biteInfectionChance=0.2, biteRange=3.0, biteBarBloodMoonMultiplier=2.0, healthyUnlockInfectedThreshold=3, sleepBarDrainDays=3.0, sleepBarNightRefillMultiplier=1.5, sleepBarDayOrBloodMoonRefillMultiplier=0.5, sleepZeroSlownessDays=2.0, sleepZeroPassOutDays=3.0, sleepPassOutExitThreshold=5.0, questVisibilityGateId=, dreamInitialDelayMinSeconds=30, dreamInitialDelayMaxSeconds=120, dreamChainImmediateChance=0.5, infectedVariantWeights=[1.0, 1.0, 1.0], infectedVariantDreamIds=[variant_reveal_0, variant_reveal_1, variant_reveal_2], infectedVariantGateQuestIds=[, , ], healthyStatMin=1, healthyStatMax=10, healthyBranchGateQuestIds=[, , , ], healthyBranchStatPreferences=[INTELLIGENCE:HIGH,CREATIVITY:HIGH, STRENGTH:HIGH,INTELLIGENCE:LOW, CREATIVITY:HIGH,STRENGTH:LOW, INTELLIGENCE:HIGH,STRENGTH:HIGH], hiveMindDropChance=0.001, hiveMindRadius=32.0, hiveMindPassiveDamage=1.0, hiveMindWandDamage=2.0}}, path=null, modConfig=net.neoforged.fml.config.ModConfig@9b1a4ab] at path apolinumarise-server.toml with synced config
+[28záø2026 14:42:16.454] [Render thread/INFO] [FTB Library/]: received server config settings for config: ftbteams-server
+[28záø2026 14:42:16.454] [Render thread/INFO] [FTB Library/]: config has been updated! server = false - clear any cached data etc. here
+[28záø2026 14:42:16.454] [Render thread/INFO] [FTB Library/]: received server config settings for config: ftblibrary-server
+[28záø2026 14:42:16.454] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Hello from FTB Library!
+[28záø2026 14:42:16.475] [Render thread/INFO] [FTB Quests/]: Read 1905 bytes, 37 objects
+[28záø2026 14:42:16.477] [Render thread/INFO] [FTB Quests/]: received translation table en_us (with 1034 entries) from server
+[28záø2026 14:42:16.477] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 2 advancements
+[28záø2026 14:42:20.947] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set own game mode to Survival Mode
+[28záø2026 14:42:54.671] [Render thread/INFO] [net.minecraft.client.gui.screens.ConnectScreen/]: Connecting to fe80::d8d8:af74:f3c8:2b5, 7956
+[28záø2026 14:42:54.901] [IO-Worker-1/WARN] [net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl/]: Failed to log in: Invalid session (Try restarting your game and the launcher)
+[28záø2026 14:42:55.477] [Render thread/WARN] [net.neoforged.fml.config.ConfigTracker/]: Overwriting non-null config LoadedConfig[config=SynchronizedConfig{DataHolder:{removeErroringBlockEntities=false, removeErroringEntities=false, fullBoundingBoxLadders=false, permissionHandler=neoforge:default_handler, advertiseDedicatedServerToLan=true}}, path=null, modConfig=net.neoforged.fml.config.ModConfig@616c9761] at path neoforge-server.toml with synced config
+[28záø2026 14:42:55.478] [Render thread/WARN] [net.neoforged.fml.config.ConfigTracker/]: Overwriting non-null config LoadedConfig[config=SynchronizedConfig{DataHolder:{enableMod=true, shrineSpawnExclusionEnabled=true, shrineSpawnExclusionDistance=3000, shrineRequireActivationCommand=false, bloodMoonBaseChance=0.01, bloodMoonChanceGrowth=1.5, bloodMoonChanceCap=1.0, mobDamageMultiplier=1.2, mobHealthMultiplier=1.2, effectRefreshIntervalTicks=100, weaknessAmplifierByPhase=[2, 1, 1, 0, 0, 0, 1, 1], miningFatigueThreshold1=50, miningFatigueThreshold2=75, miningFatigueThreshold3=90, miningFatigueAmplifier1=0, miningFatigueAmplifier2=1, miningFatigueAmplifier3=2, mosquitoWanderRadius=16, mosquitoWanderIntervalTicks=80, mosquitoHoverMinHeight=2, mosquitoHoverMaxHeight=10, mosquitoDetectionRange=70.0, mosquitoBaseDamage=3.0, mosquitoSpawnIntervalTicks=200, mosquitoSpawnBaseChance=0.02, mosquitoMaxConcurrent=6, mosquitoUndergroundSpawnWeightPercent=15, infectionChancePerBite=0.1, infectionIncubationDays=10, awakeningHealthLeft=1.0, awakeningBlindnessDurationTicks=200, awakeningBlindnessAmplifier=1, awakeningNauseaDurationTicks=600, awakeningNauseaAmplifier=2, awakeningWeaknessDurationTicks=1200, awakeningWeaknessAmplifier=0, soundFalloffDistance=100.0, soundMinVolume=0.15, symptomEarlyRollIntervalTicks=1200, symptomEarlyRollChance=0.05, symptomEarlyDurationTicks=100, symptomPoolIntervalTicks=600, symptomPoolBaseChance=0.35, symptomPoolBaseWeight=1.0, symptomPoolPoisonWeight=0.3, symptomPoolHungerWeight=0.3, symptomPoolMinDurationTicks=60, symptomPoolMaxDurationTicks=600, symptomPoolHungerDurationMultiplier=3.0, symptomPoolDay7ChanceMultiplier=2.0, symptomRefreshIntervalTicks=40, symptomSunWeaknessBaseAmplifier=0, symptomSunWeaknessPerDayIncrement=1, symptomSunMiningFatigueAmplifier=0, symptomSunBlindnessThresholdSeconds=60, symptomSunBlindnessThresholdSecondsDay10=30, symptomSunWitherAmplifier=0, moleChancePerDay=[0.75, 0.5, 0.5, 0.5, 0.7], moleBaseSizeMin=0.6, moleBaseSizeMax=1.0, moleDailyGrowthIncrement=0.15, moleGrowthMultiplierMin=1.0, moleGrowthMultiplierMax=2.0, moleCapMultiplierMin=2.3, moleCapMultiplierMax=3.7, moleDay10SizeMultiplier=2.0, downedEnabled=true, downedDurationSeconds=60, downedHealthFloor=1.0, reviveRange=3.0, reviveHoldSeconds=5.0, reviveHealthOnRevive=2.0, biteBarFillRatePercentPer20Sec=1.0, biteBarDarknessThreshold=7, biteInfectionChance=0.2, biteRange=3.0, biteBarBloodMoonMultiplier=2.0, healthyUnlockInfectedThreshold=3, sleepBarDrainDays=3.0, sleepBarNightRefillMultiplier=1.5, sleepBarDayOrBloodMoonRefillMultiplier=0.5, sleepZeroSlownessDays=2.0, sleepZeroPassOutDays=3.0, sleepPassOutExitThreshold=5.0, questVisibilityGateId=, dreamInitialDelayMinSeconds=30, dreamInitialDelayMaxSeconds=120, dreamChainImmediateChance=0.5, infectedVariantWeights=[1.0, 1.0, 1.0], infectedVariantDreamIds=[variant_reveal_0, variant_reveal_1, variant_reveal_2], infectedVariantGateQuestIds=[2B541F8B2A307186, 115A759683635544, 2F89BE645349F979], healthyStatMin=1, healthyStatMax=10, healthyBranchGateQuestIds=[05BF78ED874AE87F, 69FF0997A548F76A, 0DDEA60719307B1B, 2DD74A4620E4047B], healthyBranchStatPreferences=[INTELLIGENCE:HIGH,CREATIVITY:HIGH, STRENGTH:HIGH,INTELLIGENCE:LOW, CREATIVITY:HIGH,STRENGTH:LOW, INTELLIGENCE:HIGH,STRENGTH:HIGH], hiveMindDropChance=0.001, hiveMindRadius=32.0, hiveMindPassiveDamage=1.0, hiveMindWandDamage=2.0}}, path=null, modConfig=net.neoforged.fml.config.ModConfig@9b1a4ab] at path apolinumarise-server.toml with synced config
+[28záø2026 14:42:55.875] [Render thread/INFO] [FTB Library/]: received server config settings for config: ftbteams-server
+[28záø2026 14:42:55.875] [Render thread/INFO] [FTB Library/]: config has been updated! server = false - clear any cached data etc. here
+[28záø2026 14:42:55.875] [Render thread/INFO] [FTB Library/]: received server config settings for config: ftblibrary-server
+[28záø2026 14:42:55.875] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Hello from FTB Library!
+[28záø2026 14:42:55.884] [Render thread/INFO] [FTB Quests/]: Read 1905 bytes, 37 objects
+[28záø2026 14:42:55.901] [Render thread/INFO] [FTB Quests/]: received translation table en_us (with 1034 entries) from server
+[28záø2026 14:42:55.902] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 2 advancements
+[28záø2026 14:43:14.471] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Infected]
+[28záø2026 14:43:20.106] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Healthy]
+[28záø2026 14:43:28.163] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Infected]
+[28záø2026 14:43:29.440] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Healthy]
+[28záø2026 14:43:30.435] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Infected]
+[28záø2026 14:43:31.493] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Healthy]
+[28záø2026 14:43:32.387] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Infected]
+[28záø2026 14:43:33.257] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Healthy]
+[28záø2026 14:43:34.078] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Infected]
+[28záø2026 14:43:34.914] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Healthy]
+[28záø2026 14:43:35.727] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set Dev to Infected]
+[28záø2026 14:43:41.983] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set the time to 13000]
+[28záø2026 14:43:47.132] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] You feel your body growing weaker - The blood moon is rising
+[28záø2026 14:43:52.626] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set own game mode to Survival Mode]
+[28záø2026 14:44:04.790] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set own game mode to Survival Mode
+[28záø2026 14:44:37.852] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Gave 1 [Forbidden Tome] to Dev2
+[28záø2026 14:44:40.483] [Render thread/WARN] [net.minecraft.client.renderer.texture.TextureManager/]: Failed to load texture: apolinumarise:textures/gui/skill_panel.png
 java.io.FileNotFoundException: apolinumarise:textures/gui/skill_panel.png
 	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.packs.resources.ResourceProvider.lambda$getResourceOrThrow$1(ResourceProvider.java:18) ~[neoforge-21.1.238.jar%23189!/:?]
 	at java.base/java.util.Optional.orElseThrow(Optional.java:403) ~[?:?]
@@ -128,7 +196,7 @@ java.io.FileNotFoundException: apolinumarise:textures/gui/skill_panel.png
 	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[?:?]
 	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[?:?]
 	at net.neoforged.devlaunch.Main.main(Main.java:57) [DevLaunch-1.0.2.jar:?]
-[19záø2026 23:40:07.785] [Render thread/WARN] [net.minecraft.client.renderer.texture.TextureManager/]: Failed to load texture: apolinumarise:textures/gui/skill_panel.png
+[28záø2026 14:44:40.485] [Render thread/WARN] [net.minecraft.client.renderer.texture.TextureManager/]: Failed to load texture: apolinumarise:textures/gui/skill_panel.png
 java.io.FileNotFoundException: apolinumarise:textures/gui/skill_panel.png
 	at TRANSFORMER/minecraft@1.21.1/net.minecraft.server.packs.resources.ResourceProvider.lambda$getResourceOrThrow$1(ResourceProvider.java:18) ~[neoforge-21.1.238.jar%23189!/:?]
 	at java.base/java.util.Optional.orElseThrow(Optional.java:403) ~[?:?]
@@ -173,23 +241,13 @@ java.io.FileNotFoundException: apolinumarise:textures/gui/skill_panel.png
 	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103) ~[?:?]
 	at java.base/java.lang.reflect.Method.invoke(Method.java:580) ~[?:?]
 	at net.neoforged.devlaunch.Main.main(Main.java:57) [DevLaunch-1.0.2.jar:?]
-[19záø2026 23:40:08.808] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Apolinum] No quest content was revealed for healthy branch 0: no gate quest id is configured for it - paste one into the config, or run /apolinumquests testchain create to generate the placeholder chain.
-[19záø2026 23:40:25.987] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Created 7 gated placeholder chapters, saved the quest file, and wrote their ids into the config - no pasting needed.\nInfected Variant 0 -> 4CD39E317B61CB8E\nInfected Variant 1 -> 6B70F2720273F922\nInfected Variant 2 -> 36D111B874E0385B\nHealthy Branch 0 -> 4F5A6D7CB63249C9\nHealthy Branch 1 -> 40A76526E913D0E2\nHealthy Branch 2 -> 0201D20BC8CF340E\nHealthy Branch 3 -> 76285AF2A501DF59\n\ninfectedVariantGateQuestIds = ["4CD39E317B61CB8E", "6B70F2720273F922", "36D111B874E0385B"]\nhealthyBranchGateQuestIds = ["4F5A6D7CB63249C9", "40A76526E913D0E2", "0201D20BC8CF340E", "76285AF2A501DF59"]\nNow RECONNECT: the quest file is only synced to clients on join, so the new chapters will not appear until you do.
-[19záø2026 23:40:29.481] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Gave 1 [Forbidden Tome] to Dev2
-[19záø2026 23:40:37.953] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Removed 8 placeholder chapter(s). Reconnect to see the change.
-[19záø2026 23:40:44.399] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Reset Dev2: 0 quest object(s) across their gates, and cleared their variant and branch.\r\n  gates completed before: 0, after: 0  (clean)\r\n  They will be re-assigned a variant at the next Blood Moon while infected, and asked to pick a branch the next time they open their skills.
-[19záø2026 23:40:50.351] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Created 7 gated placeholder chapters, saved the quest file, and wrote their ids into the config - no pasting needed.\nInfected Variant 0 -> 7088253F631F2E61\nInfected Variant 1 -> 06952B269CB0B760\nInfected Variant 2 -> 3A6DAC5C74BAB193\nHealthy Branch 0 -> 3D48D12DABF0B92B\nHealthy Branch 1 -> 169BF6A298814639\nHealthy Branch 2 -> 2E13996F4BE95D9E\nHealthy Branch 3 -> 6ABBECBFF6BFFB26\n\ninfectedVariantGateQuestIds = ["7088253F631F2E61", "06952B269CB0B760", "3A6DAC5C74BAB193"]\nhealthyBranchGateQuestIds = ["3D48D12DABF0B92B", "169BF6A298814639", "2E13996F4BE95D9E", "6ABBECBFF6BFFB26"]\nNow RECONNECT: the quest file is only synced to clients on join, so the new chapters will not appear until you do.
-[19záø2026 23:40:52.651] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Gave 1 [Forbidden Tome] to Dev2
-[19záø2026 23:41:22.234] [Render thread/INFO] [net.minecraft.client.gui.screens.ConnectScreen/]: Connecting to fe80::d8d8:af74:f3c8:2b5, 13111
-[19záø2026 23:41:22.469] [IO-Worker-1/WARN] [net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl/]: Failed to log in: Invalid session (Try restarting your game and the launcher)
-[19záø2026 23:41:22.804] [Render thread/WARN] [net.neoforged.fml.config.ConfigTracker/]: Overwriting non-null config LoadedConfig[config=SynchronizedConfig{DataHolder:{removeErroringBlockEntities=false, removeErroringEntities=false, fullBoundingBoxLadders=false, permissionHandler=neoforge:default_handler, advertiseDedicatedServerToLan=true}}, path=null, modConfig=net.neoforged.fml.config.ModConfig@55de103d] at path neoforge-server.toml with synced config
-[19záø2026 23:41:22.807] [Render thread/WARN] [net.neoforged.fml.config.ConfigTracker/]: Overwriting non-null config LoadedConfig[config=SynchronizedConfig{DataHolder:{enableMod=true, shrineSpawnExclusionEnabled=true, shrineSpawnExclusionDistance=3000, shrineRequireActivationCommand=false, bloodMoonBaseChance=0.01, bloodMoonChanceGrowth=1.5, bloodMoonChanceCap=1.0, mobDamageMultiplier=1.2, mobHealthMultiplier=1.2, effectRefreshIntervalTicks=100, weaknessAmplifierByPhase=[2, 1, 1, 0, 0, 0, 1, 1], miningFatigueThreshold1=50, miningFatigueThreshold2=75, miningFatigueThreshold3=90, miningFatigueAmplifier1=0, miningFatigueAmplifier2=1, miningFatigueAmplifier3=2, mosquitoWanderRadius=16, mosquitoWanderIntervalTicks=80, mosquitoHoverMinHeight=2, mosquitoHoverMaxHeight=10, mosquitoDetectionRange=70.0, mosquitoBaseDamage=3.0, mosquitoSpawnIntervalTicks=200, mosquitoSpawnBaseChance=0.02, mosquitoMaxConcurrent=6, mosquitoUndergroundSpawnWeightPercent=15, infectionChancePerBite=0.1, infectionIncubationDays=10, awakeningHealthLeft=1.0, awakeningBlindnessDurationTicks=200, awakeningBlindnessAmplifier=1, awakeningNauseaDurationTicks=600, awakeningNauseaAmplifier=2, awakeningWeaknessDurationTicks=1200, awakeningWeaknessAmplifier=0, soundFalloffDistance=100.0, soundMinVolume=0.15, symptomEarlyRollIntervalTicks=1200, symptomEarlyRollChance=0.05, symptomEarlyDurationTicks=100, symptomPoolIntervalTicks=600, symptomPoolBaseChance=0.35, symptomPoolBaseWeight=1.0, symptomPoolPoisonWeight=0.3, symptomPoolHungerWeight=0.3, symptomPoolMinDurationTicks=60, symptomPoolMaxDurationTicks=600, symptomPoolHungerDurationMultiplier=3.0, symptomPoolDay7ChanceMultiplier=2.0, symptomRefreshIntervalTicks=40, symptomSunWeaknessBaseAmplifier=0, symptomSunWeaknessPerDayIncrement=1, symptomSunMiningFatigueAmplifier=0, symptomSunBlindnessThresholdSeconds=60, symptomSunBlindnessThresholdSecondsDay10=30, symptomSunWitherAmplifier=0, moleChancePerDay=[0.75, 0.5, 0.5, 0.5, 0.7], moleBaseSizeMin=0.6, moleBaseSizeMax=1.0, moleDailyGrowthIncrement=0.15, moleGrowthMultiplierMin=1.0, moleGrowthMultiplierMax=2.0, moleCapMultiplierMin=2.3, moleCapMultiplierMax=3.7, moleDay10SizeMultiplier=2.0, downedEnabled=true, downedDurationSeconds=60, downedHealthFloor=1.0, reviveRange=3.0, reviveHoldSeconds=5.0, reviveHealthOnRevive=2.0, biteBarFillRatePercentPer20Sec=1.0, biteBarDarknessThreshold=7, biteInfectionChance=0.2, biteRange=3.0, biteBarBloodMoonMultiplier=2.0, healthyUnlockInfectedThreshold=3, sleepBarDrainDays=3.0, sleepBarNightRefillMultiplier=1.5, sleepBarDayOrBloodMoonRefillMultiplier=0.5, sleepZeroSlownessDays=2.0, sleepZeroPassOutDays=3.0, sleepPassOutExitThreshold=5.0, questVisibilityGateId=, dreamInitialDelayMinSeconds=30, dreamInitialDelayMaxSeconds=120, dreamChainImmediateChance=0.5, infectedVariantWeights=[1.0, 1.0, 1.0], infectedVariantDreamIds=[variant_reveal_0, variant_reveal_1, variant_reveal_2], infectedVariantGateQuestIds=[, , ], healthyStatMin=1, healthyStatMax=10, healthyBranchGateQuestIds=[, , , ], healthyBranchStatPreferences=[INTELLIGENCE:HIGH,CREATIVITY:HIGH, STRENGTH:HIGH,INTELLIGENCE:LOW, CREATIVITY:HIGH,STRENGTH:LOW, INTELLIGENCE:HIGH,STRENGTH:HIGH]}}, path=null, modConfig=net.neoforged.fml.config.ModConfig@6d9bf927] at path apolinumarise-server.toml with synced config
-[19záø2026 23:41:23.296] [Render thread/INFO] [FTB Library/]: received server config settings for config: ftbteams-server
-[19záø2026 23:41:23.296] [Render thread/INFO] [FTB Library/]: config has been updated! server = false - clear any cached data etc. here
-[19záø2026 23:41:23.296] [Render thread/INFO] [FTB Library/]: received server config settings for config: ftblibrary-server
-[19záø2026 23:41:23.296] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Hello from FTB Library!
-[19záø2026 23:41:23.316] [Render thread/INFO] [FTB Quests/]: Read 1905 bytes, 37 objects
-[19záø2026 23:41:23.318] [Render thread/INFO] [FTB Quests/]: received translation table en_us (with 1034 entries) from server
-[19záø2026 23:41:23.318] [Render thread/INFO] [net.minecraft.advancements.AdvancementTree/]: Loaded 2 advancements
-[19záø2026 23:41:39.419] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set own game mode to Survival Mode
-[19záø2026 23:41:45.565] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Stopping!
+[28záø2026 14:44:56.490] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Gave 1 [Hive-Mind Wand] to Dev]
+[28záø2026 14:45:33.050] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set own game mode to Creative Mode]
+[28záø2026 14:45:46.914] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set own game mode to Survival Mode]
+[28záø2026 14:46:10.295] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Gave Dev the Hive-Mind wand and unlocked the ability (the same call the drop makes).]
+[28záø2026 14:46:20.980] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev has made the advancement [Monster Hunter]
+[28záø2026 14:46:57.460] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Set own game mode to Creative Mode
+[28záø2026 14:47:17.150] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] [Dev: Set own game mode to Creative Mode]
+[28záø2026 14:57:04.844] [Render thread/INFO] [net.minecraft.client.gui.components.ChatComponent/]: [System] [CHAT] Dev left the game
+[28záø2026 14:57:05.840] [Render thread/WARN] [net.minecraft.client.multiplayer.ClientCommonPacketListenerImpl/]: Client disconnected with reason: Disconnected
+[28záø2026 14:57:10.675] [Render thread/INFO] [net.minecraft.client.Minecraft/]: Stopping!

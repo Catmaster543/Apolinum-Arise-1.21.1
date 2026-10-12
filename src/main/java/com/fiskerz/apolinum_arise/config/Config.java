@@ -485,6 +485,57 @@ public class Config {
                             "INTELLIGENCE:HIGH,STRENGTH:HIGH"),
                     value -> value instanceof String);
 
+    // --- Abilities: Hive-Mind (Phase 12) ---
+
+    public static final ModConfigSpec.DoubleValue HIVE_MIND_DROP_CHANCE = BUILDER
+            .comment("Chance, per mob killed, that the Hive-Mind wand drops. Only rolled for a player who is",
+                    "infected with variant 1, has watched the hivemind_whispers dream, and does not already",
+                    "hold the ability - everyone else never rolls at all. Receiving the wand IS the unlock.")
+            .defineInRange("hiveMindDropChance", 0.001D, 0.0D, 1.0D);
+
+    public static final ModConfigSpec.DoubleValue HIVE_MIND_RADIUS = BUILDER
+            .comment("Radius in blocks around the WIELDER within which mobs are turned on whatever the wand",
+                    "just struck. Mobs that can already fight are simply given the victim as their target;",
+                    "passive mobs get a temporary goal that chases and bites it.")
+            .defineInRange("hiveMindRadius", 32.0D, 0.0D, 256.0D);
+
+    public static final ModConfigSpec.DoubleValue HIVE_MIND_PASSIVE_DAMAGE = BUILDER
+            .comment("Damage a goaded PASSIVE mob deals per bite (2.0 = one heart). Applied about once a",
+                    "second while it stays in contact with the target.")
+            .defineInRange("hiveMindPassiveDamage", 1.0D, 0.0D, 1024.0D);
+
+    public static final ModConfigSpec.DoubleValue HIVE_MIND_WAND_DAMAGE = BUILDER
+            .comment("Total melee damage of the Hive-Mind wand (2.0 = one heart), for ANY wielder - the",
+                    "ability only adds the radius effect, never extra damage. Read live: the item supplies its",
+                    "attack-damage modifier per stack rather than baking it in at registration, so this value",
+                    "applies without a restart.")
+            .defineInRange("hiveMindWandDamage", 2.0D, 0.0D, 1024.0D);
+
+    // --- Abilities: Strong Punch (Phase 13) ---
+
+    public static final ModConfigSpec.DoubleValue STRONG_PUNCH_CHARGE_SECONDS = BUILDER
+            .comment("Seconds the attack key must be held, bare-fisted, on ONE living target within melee",
+                    "range before the strong punch fires. The charge resets to zero - with no partial credit -",
+                    "the moment the target changes, the key is released, the target leaves range, or anything",
+                    "is picked up. Normal attacks on the same target do not interrupt it.")
+            .defineInRange("strongPunchChargeSeconds", 2.0D, 0.05D, 3600.0D);
+
+    public static final ModConfigSpec.DoubleValue STRONG_PUNCH_COOLDOWN_SECONDS = BUILDER
+            .comment("Seconds after a strong punch lands before another charge can begin.")
+            .defineInRange("strongPunchCooldownSeconds", 10.0D, 0.0D, 3600.0D);
+
+    public static final ModConfigSpec.DoubleValue STRONG_PUNCH_DAMAGE_MULTIPLIER = BUILDER
+            .comment("The player's CURRENT fist damage is multiplied by this. Read from the live",
+                    "ATTACK_DAMAGE attribute, so buffs are already included - vanilla Strength adds to that",
+                    "same attribute, which is how the night-time infection Strength feeds in automatically.")
+            .defineInRange("strongPunchDamageMultiplier", 3.0D, 0.0D, 1000.0D);
+
+    public static final ModConfigSpec.IntValue STRONG_PUNCH_AREA_SIZE = BUILDER
+            .comment("Edge length, in blocks, of the cube centred on the target in which everything takes the",
+                    "hit. Everyone caught is damaged exactly once - including passive mobs and other players.",
+                    "Only the wielder is excluded.")
+            .defineInRange("strongPunchAreaSize", 2, 1, 64);
+
     /** One entry of a 3- or 4-wide indexed list config; empty string when the index is out of range. */
     public static String getIndexed(ModConfigSpec.ConfigValue<List<? extends String>> list, int index) {
         List<? extends String> values = list.get();

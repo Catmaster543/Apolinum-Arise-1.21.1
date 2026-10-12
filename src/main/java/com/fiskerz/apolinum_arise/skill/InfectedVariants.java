@@ -3,6 +3,8 @@ package com.fiskerz.apolinum_arise.skill;
 import java.util.List;
 
 import com.fiskerz.apolinum_arise.Apolinumarise;
+import com.fiskerz.apolinum_arise.ability.Abilities;
+import com.fiskerz.apolinum_arise.ability.AbilitySide;
 import com.fiskerz.apolinum_arise.config.Config;
 import com.fiskerz.apolinum_arise.dream.DreamManager;
 
@@ -59,6 +61,16 @@ public final class InfectedVariants {
             Apolinumarise.LOGGER.debug("[Skill] No reveal dream configured for infected variant {}.", variant);
         } else {
             DreamManager.queueDream(player, dreamId);
+        }
+
+        // Phase 12/13: also queue the prerequisite dream of every ability restricted to this variant, at
+        // the same instant, so their unlock conditions become reachable the moment the player qualifies -
+        // and never for any other variant. Driven off the ability registry rather than a list of ids here,
+        // so registering a new variant ability with a dream prerequisite needs no change to this method.
+        for (String prerequisite : Abilities.prerequisiteDreamsFor(AbilitySide.INFECTED, variant)) {
+            DreamManager.queueDream(player, prerequisite);
+            Apolinumarise.LOGGER.info("[Skill] Queued ability prerequisite dream '{}' for {} (variant {}).",
+                    prerequisite, player.getGameProfile().getName(), variant);
         }
 
         if (player instanceof ServerPlayer serverPlayer) {

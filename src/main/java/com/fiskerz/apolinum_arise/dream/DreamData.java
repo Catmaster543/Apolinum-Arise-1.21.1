@@ -16,14 +16,17 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
  * category broadcasts this player has already been given, keyed by {@link DreamBroadcasts#key}, so the
  * same broadcast is never handed out twice even if the player changes category and changes back.
  */
-public record DreamData(List<String> queue, Set<String> receivedBroadcasts) {
-    public static final DreamData EMPTY = new DreamData(List.of(), Set.of());
+public record DreamData(List<String> queue, Set<String> receivedBroadcasts, Set<String> watched) {
+    public static final DreamData EMPTY = new DreamData(List.of(), Set.of(), Set.of());
 
     public static final Codec<DreamData> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             Codec.STRING.listOf().optionalFieldOf("queue", List.of()).forGetter(DreamData::queue),
             Codec.STRING.listOf().optionalFieldOf("receivedBroadcasts", List.of())
-                    .forGetter(data -> List.copyOf(data.receivedBroadcasts()))
-    ).apply(instance, (queue, received) -> new DreamData(List.copyOf(queue), new LinkedHashSet<>(received))));
+                    .forGetter(data -> List.copyOf(data.receivedBroadcasts())),
+            Codec.STRING.listOf().optionalFieldOf("watched", List.of())
+                    .forGetter(data -> List.copyOf(data.watched()))
+    ).apply(instance, (queue, received, watched) -> new DreamData(
+            List.copyOf(queue), new LinkedHashSet<>(received), new LinkedHashSet<>(watched))));
 
     public boolean hasQueued() {
         return !queue.isEmpty();
@@ -33,7 +36,7 @@ public record DreamData(List<String> queue, Set<String> receivedBroadcasts) {
     public DreamData withQueued(String dreamId) {
         List<String> next = new ArrayList<>(queue);
         next.add(dreamId);
-        return new DreamData(List.copyOf(next), receivedBroadcasts);
+        return new DreamData(List.copyOf(next), receivedBroadcasts, watched);
     }
 
     /** Remove and return nothing - the caller reads {@link #queue()} first. Pops the head. */
@@ -41,7 +44,7 @@ public record DreamData(List<String> queue, Set<String> receivedBroadcasts) {
         if (queue.isEmpty()) {
             return this;
         }
-        return new DreamData(List.copyOf(queue.subList(1, queue.size())), receivedBroadcasts);
+        return new DreamData(List.copyOf(queue.subList(1, queue.size())), receivedBroadcasts, watched);
     }
 
     public boolean hasReceived(String broadcastKey) {
@@ -51,6 +54,28 @@ public record DreamData(List<String> queue, Set<String> receivedBroadcasts) {
     public DreamData withReceived(String broadcastKey) {
         Set<String> next = new LinkedHashSet<>(receivedBroadcasts);
         next.add(broadcastKey);
-        return new DreamData(queue, Set.copyOf(next));
+        return new DreamData(queue, Set.copyOf(next), watched);
+    }
+
+    /**
+     * Whether this dream has ever been watched through to its end (Phase 12).
+     *
+     * <p>Distinct from having been queued or started: an ability prerequisite is "you saw this", so only a
+     * playback that reached its final tick counts. Interrupting a dream - getting out of bed, being bitten
+     * - leaves the dream in neither the queue nor this set, which is deliberate: the dream was consumed but
+     * not seen, and the player would need it queued again to earn the prerequisite.
+     */
+    public boolean hasWatched(String dreamId) {
+        return watched.contains(dreamId);
+    }
+
+    /** Returns this instance unchanged when already recorded, so callers can skip a pointless setData. */
+    public DreamData withWatched(String dreamId) {
+        if (watched.contains(dreamId)) {
+            return this;
+        }
+        Set<String> next = new LinkedHashSet<>(watched);
+        next.add(dreamId);
+        return new DreamData(queue, receivedBroadcasts, Set.copyOf(next));
     }
 }

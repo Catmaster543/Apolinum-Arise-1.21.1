@@ -46,8 +46,33 @@ public final class DreamCommands {
                                 .then(Commands.argument("chunkZ", com.mojang.brigadier.arguments.IntegerArgumentType.integer())
                                         .executes(DreamCommands::peek))))
                 .then(Commands.literal("unpeek").executes(DreamCommands::unpeek))
+                .then(Commands.literal("watched")
+                        .then(Commands.argument("dreamId", StringArgumentType.word())
+                                .suggests((ctx, builder) -> SharedSuggestionProvider.suggest(DreamScripts.INSTANCE.ids(), builder))
+                                .executes(ctx -> setWatched(ctx, true))
+                                .then(Commands.literal("false").executes(ctx -> setWatched(ctx, false)))))
                 .then(Commands.literal("now").executes(DreamCommands::now))
                 .then(Commands.literal("stop").executes(DreamCommands::stop)));
+    }
+
+    /**
+     * Mark a dream watched (or un-watch it) without sitting through playback - the only practical way to
+     * test an ability prerequisite, since a dream takes minutes and needs a bed.
+     *
+     * <p>Note it accepts ids with no loaded script on purpose: the watched set is just a record of ids, and
+     * being able to satisfy a prerequisite whose script has not been authored yet is useful.
+     */
+    private static int setWatched(CommandContext<CommandSourceStack> context, boolean watched)
+            throws CommandSyntaxException {
+        ServerPlayer player = context.getSource().getPlayerOrException();
+        String dreamId = StringArgumentType.getString(context, "dreamId");
+        boolean changed = watched
+                ? DreamManager.markWatched(player, dreamId)
+                : DreamManager.unmarkWatched(player, dreamId);
+        context.getSource().sendSuccess(() -> Component.literal(String.format(
+                "'%s' is now %swatched for %s%s.", dreamId, watched ? "" : "NOT ",
+                player.getGameProfile().getName(), changed ? "" : " (no change)")), true);
+        return changed ? 1 : 0;
     }
 
     private static int list(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -55,6 +80,7 @@ public final class DreamCommands {
         context.getSource().sendSuccess(() -> Component.literal(
                 "Loaded dreams: " + DreamScripts.INSTANCE.ids()
                         + "\nYour queue: " + player.getData(DreamAttachments.DREAMS).queue()
+                        + "\nWatched: " + player.getData(DreamAttachments.DREAMS).watched()
                         + "\nCategory: " + DreamCategory.of(player)
                         + "\nDreaming: " + DreamManager.isDreaming(player)), false);
         return 1;

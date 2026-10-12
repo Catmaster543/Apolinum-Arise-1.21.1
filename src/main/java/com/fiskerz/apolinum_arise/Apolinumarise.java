@@ -4,6 +4,12 @@ import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
 
+import com.fiskerz.apolinum_arise.ability.AbilityAttachments;
+import com.fiskerz.apolinum_arise.ability.AbilityCommands;
+import com.fiskerz.apolinum_arise.ability.Abilities;
+import com.fiskerz.apolinum_arise.ability.hivemind.HiveMindEvents;
+import com.fiskerz.apolinum_arise.ability.hivemind.HiveMindRegistry;
+import com.fiskerz.apolinum_arise.ability.strongpunch.StrongPunchManager;
 import com.fiskerz.apolinum_arise.bloodmoon.BloodMoonRegistry;
 import com.fiskerz.apolinum_arise.bloodmoon.BloodMoonEvents;
 import com.fiskerz.apolinum_arise.config.Config;
@@ -60,6 +66,10 @@ public class Apolinumarise {
         SleepAttachments.register(modEventBus);
         DreamAttachments.register(modEventBus);
         DreamRegistry.register(modEventBus);
+        AbilityAttachments.register(modEventBus);
+        HiveMindRegistry.register(modEventBus);
+        // Phase 12: build the ability registry now, so it is complete before anything can query it.
+        Abilities.init();
         // Phase 11a: FTB Quests integration. No-op (and never touches FTB classes) when it is absent.
         ApolinumQuests.init();
         modEventBus.addListener(ModNetworking::register);
@@ -114,6 +124,11 @@ public class Apolinumarise {
         NeoForge.EVENT_BUS.addListener(SleepEvents::onPlayerLoggedIn);
         NeoForge.EVENT_BUS.addListener(SleepEvents::onPlayerLoggedOut);
 
+        // Phase 12 ability system: the Hive-Mind wand's drop hangs off vanilla kill credit.
+        NeoForge.EVENT_BUS.addListener(HiveMindEvents::onLivingDeath);
+        // Phase 13 Strong Punch: server-authoritative charge tracking, ticked for unlocked players only.
+        NeoForge.EVENT_BUS.addListener(Apolinumarise::onAbilityServerTick);
+
         // SERVER config: per-world, admin-controlled (see config.Config)
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SPEC);
 
@@ -128,6 +143,11 @@ public class Apolinumarise {
         // The skill book lives in Tools & Utilities so it can be handed out for testing before shrines exist.
         if (event.getTabKey() == CreativeModeTabs.TOOLS_AND_UTILITIES) {
             event.accept(SkillRegistry.SKILL_BOOK.get());
+        }
+        // The wand is a weapon; having it in Combat makes "does it hit for one heart?" testable without
+        // farming its drop. Holding it grants nothing - the ability is the unlock, not the item.
+        if (event.getTabKey() == CreativeModeTabs.COMBAT) {
+            event.accept(HiveMindRegistry.HIVE_MIND_STICK.get());
         }
     }
 
@@ -150,8 +170,15 @@ public class Apolinumarise {
         }
     }
 
+    private static void onAbilityServerTick(net.neoforged.neoforge.event.tick.ServerTickEvent.Post event) {
+        StrongPunchManager.onServerTick(event.getServer());
+    }
+
     private static void onPlayerLoggedOut(PlayerEvent.PlayerLoggedOutEvent event) {
         BloodMoonEvents.onPlayerLoggedOut(event);
+        if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer player) {
+            StrongPunchManager.onLogout(player);
+        }
     }
 
     private static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
@@ -166,6 +193,7 @@ public class Apolinumarise {
         BloodMoonEvents.onRegisterCommands(event);
         com.fiskerz.apolinum_arise.dream.DreamCommands.register(event.getDispatcher());
         com.fiskerz.apolinum_arise.skill.SkillCommands.register(event.getDispatcher());
+        AbilityCommands.register(event.getDispatcher());
         if (ApolinumQuests.isQuestsLoaded()) {
             QuestDebugCommand.register(event.getDispatcher());
         }

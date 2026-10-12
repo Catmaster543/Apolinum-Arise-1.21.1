@@ -3,6 +3,8 @@ package com.fiskerz.apolinum_arise.skill;
 import java.util.List;
 
 import com.fiskerz.apolinum_arise.Apolinumarise;
+import com.fiskerz.apolinum_arise.ability.Abilities;
+import com.fiskerz.apolinum_arise.ability.AbilitySide;
 import com.fiskerz.apolinum_arise.config.Config;
 import com.fiskerz.apolinum_arise.dream.DreamAttachments;
 import com.fiskerz.apolinum_arise.dream.DreamData;
@@ -42,19 +44,28 @@ public class SkillProfileGameTests {
         helper.assertTrue(InfectedVariants.isValidIndex(assigned.infectedVariant()),
                 "Variant must be 0..2, got " + assigned.infectedVariant());
 
-        // The reveal dream for exactly that variant, queued at the same instant.
-        String expectedDream = Config.getIndexed(Config.INFECTED_VARIANT_DREAM_IDS, assigned.infectedVariant());
+        // The reveal dream for exactly that variant, queued at the same instant - plus (Phase 13) the
+        // prerequisite dream of every ability restricted to this variant, which the registry supplies.
+        int variant = assigned.infectedVariant();
+        String expectedDream = Config.getIndexed(Config.INFECTED_VARIANT_DREAM_IDS, variant);
+        List<String> prerequisites = Abilities.prerequisiteDreamsFor(AbilitySide.INFECTED, variant);
         List<String> queue = player.getData(DreamAttachments.DREAMS).queue();
-        helper.assertValueEqual(queue.size(), 1, "Exactly one dream queued");
-        helper.assertValueEqual(queue.get(0), expectedDream, "The queued dream is this variant's reveal dream");
 
-        // A repeat grant is a no-op, and even calling the assignment directly must not re-roll.
+        helper.assertValueEqual(queue.size(), 1 + prerequisites.size(),
+                "The reveal dream plus one dream per ability restricted to variant " + variant + ", got " + queue);
+        helper.assertValueEqual(queue.get(0), expectedDream, "The reveal dream comes first");
+        for (String prerequisite : prerequisites) {
+            helper.assertTrue(queue.contains(prerequisite),
+                    "Variant " + variant + "'s ability prerequisite '" + prerequisite + "' must be queued too");
+        }
+
+        // A repeat grant is a no-op, and even calling the assignment directly must not re-roll or re-queue.
         helper.assertFalse(SkillLogic.grantInfectedAccess(player), "Second grant is a no-op");
         InfectedVariants.assignOnAccessGranted(player);
-        helper.assertValueEqual(SkillLogic.profile(player).infectedVariant(), assigned.infectedVariant(),
+        helper.assertValueEqual(SkillLogic.profile(player).infectedVariant(), variant,
                 "The variant is permanent - never re-rolled");
-        helper.assertValueEqual(player.getData(DreamAttachments.DREAMS).queue().size(), 1,
-                "The reveal dream is queued exactly once");
+        helper.assertValueEqual(player.getData(DreamAttachments.DREAMS).queue().size(), 1 + prerequisites.size(),
+                "The dreams are queued exactly once");
         helper.succeed();
     }
 
