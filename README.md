@@ -1,5 +1,5 @@
 # What's this mod about?
-This is a Minecraft mod made for neoforge 1.21.1, that is mainly themed around an unknown infection, designated and balanced to be used on multiplayer servers. You can download it [here]()
+This is a Minecraft mod made for neoforge 1.21.1, that is mainly themed around an unknown infection, designated and balanced to be used on multiplayer servers. You can download it [here](https://www.curseforge.com/minecraft/mc-mods/apolinum-arise/)
 
 ## Features
 
