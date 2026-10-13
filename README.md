@@ -1,5 +1,5 @@
 ## Info for Stardance shipwrights!
-If the "Try project" button redirects to a 404 page, then the project has not been approved on CurseForge yet! Please give it a tiny bit of time till it's approved, I wanted to ship the project only after it's been approved there, but completely forgot about it, sorry! If it's the case, then I'd be super happy if my other Mod project would finally get a reviewed after nearly over a month, if there's still something wrong I'll happily take any feedback, thanks! It's [here](https://stardance.hackclub.com/projects/50587)
+This is not related to this project, but.. I'd be super happy if my other mod project would finally get a reviewed after nearly over a **month**, if there's still something wrong I'll happily take any feedback, thanks! It's [here](https://stardance.hackclub.com/projects/50587)
 # What's this mod about?
 This is a Minecraft mod made for neoforge 1.21.1, that is mainly themed around an unknown infection, designated and balanced to be used on multiplayer servers. You can download it [here](https://www.curseforge.com/minecraft/mc-mods/apolinum-arise/)
 
