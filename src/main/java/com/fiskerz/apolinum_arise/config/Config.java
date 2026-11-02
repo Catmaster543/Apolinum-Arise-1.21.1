@@ -536,6 +536,52 @@ public class Config {
                     "Only the wielder is excluded.")
             .defineInRange("strongPunchAreaSize", 2, 1, 64);
 
+    // --- Abilities: Digging In (Phase 14) ---
+
+    public static final ModConfigSpec.DoubleValue DIGGING_IN_TRANSITION_COOLDOWN_SECONDS = BUILDER
+            .comment("Seconds before another Digging In transition is permitted. Applies to BOTH directions,",
+                    "so this is also the minimum time spent underground: burrowing locks the exit for this",
+                    "long, and surfacing locks the next burrow for this long. Forced exits (death, downed,",
+                    "logout, dimension change, teleport) ignore it entirely.")
+            .defineInRange("diggingInTransitionCooldownSeconds", 60.0D, 0.0D, 3600.0D);
+
+    public static final ModConfigSpec.DoubleValue DIGGING_IN_MAX_DURATION_SECONDS = BUILDER
+            .comment("Seconds underground before the player is automatically ejected to safe ground.",
+                    "Clamped up to diggingInTransitionCooldownSeconds if set lower, with a warning - a",
+                    "shorter maximum would eject a player who is not yet allowed to surface.")
+            .defineInRange("diggingInMaxDurationSeconds", 120.0D, 0.0D, 86400.0D);
+
+    public static final ModConfigSpec.DoubleValue DIGGING_IN_SPEED_BLOCKS_PER_SECOND = BUILDER
+            .comment("Movement speed while burrowed, in blocks per second, along the look vector in full 3D.",
+                    "Safe well past the default: the server's moved-too-quickly check compares against a",
+                    "threshold of 100 per packet, and 5 blocks/second is 0.25 per tick.")
+            .defineInRange("diggingInSpeedBlocksPerSecond", 5.0D, 0.1D, 100.0D);
+
+    public static final ModConfigSpec.IntValue DIGGING_IN_SAFE_SEARCH_RADIUS = BUILDER
+            .comment("Radius in blocks searched for a safe standing position when a burrowed player has to",
+                    "be ejected. Positions on solid ground are preferred and lava is avoided; if nothing is",
+                    "found the search falls back to the surface at the same X/Z, then the respawn point.")
+            .defineInRange("diggingInSafeSearchRadius", 16, 1, 128);
+
+    // --- Abilities: Call of the Hive (Phase 15) ---
+
+    public static final ModConfigSpec.DoubleValue CALL_OF_THE_HIVE_COOLDOWN_SECONDS = BUILDER
+            .comment("Seconds after a Call of the Hive before the Hive-Mind wand can call again. Shown on the",
+                    "wand as the vanilla item cooldown, and kept across relogs and deaths. A call that found",
+                    "nothing to teleport does not start it.")
+            .defineInRange("callOfTheHiveCooldownSeconds", 90.0D, 0.0D, 3600.0D);
+
+    public static final ModConfigSpec.IntValue CALL_OF_THE_HIVE_CHUNK_RADIUS = BUILDER
+            .comment("Chunks around the caster's own chunk that are swept, at full world height. 1 = the",
+                    "caster's chunk plus the 8 around it (3x3); 0 = the caster's chunk only.")
+            .defineInRange("callOfTheHiveChunkRadius", 1, 0, 4);
+
+    public static final ModConfigSpec.IntValue CALL_OF_THE_HIVE_SPREAD_RADIUS = BUILDER
+            .comment("Horizontal radius, in blocks, around the caster in which called mobs are set down. Every",
+                    "mob gets its own collision-free spot that overlaps no other arrival, so nothing",
+                    "suffocates or is crammed; a mob for which no safe spot exists stays where it was.")
+            .defineInRange("callOfTheHiveSpreadRadius", 8, 2, 32);
+
     /** One entry of a 3- or 4-wide indexed list config; empty string when the index is out of range. */
     public static String getIndexed(ModConfigSpec.ConfigValue<List<? extends String>> list, int index) {
         List<? extends String> values = list.get();

@@ -9,8 +9,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fiskerz.apolinum_arise.Apolinumarise;
+import com.fiskerz.apolinum_arise.ability.diggingin.DiggingIn;
+import com.fiskerz.apolinum_arise.ability.diggingin.DiggingInManager;
+import com.fiskerz.apolinum_arise.ability.hivemind.CallOfTheHive;
 import com.fiskerz.apolinum_arise.ability.hivemind.HiveMind;
 import com.fiskerz.apolinum_arise.ability.strongpunch.StrongPunch;
+
+import net.minecraft.world.entity.player.Player;
 
 /**
  * The ability registry: every {@link Ability} the mod knows about, keyed by id.
@@ -26,14 +31,60 @@ public final class Abilities {
     private static final Map<String, Ability> BY_ID = new LinkedHashMap<>();
 
     static {
-        // Phase 12's proving ability: infected, variant 1 only, earned by watching the whispers dream and
-        // then being handed the wand. See the hivemind package for everything it actually does.
+        // Phase 12 proving ability: infected, Branch 1 = variant 0 only, earned by watching the whispers
+        // dream and then being handed the wand. See the hivemind package for what it does.
         register(Ability.restrictedTo(HiveMind.ABILITY_ID, AbilitySide.INFECTED, HiveMind.VARIANT,
                 new UnlockCondition.DreamWatched(HiveMind.DREAM_ID)));
-        // Phase 13: infected, variant 2 only. No item and no drop - watching the dream is the whole
-        // unlock, so the condition being met IS the ability being available.
+        // Phase 13: infected, Branch 2 = variant 1 only. No item and no drop - watching the dream is the
+        // whole unlock, so the condition being met IS the ability being available.
         register(Ability.restrictedTo(StrongPunch.ABILITY_ID, AbilitySide.INFECTED, StrongPunch.VARIANT,
                 new UnlockCondition.DreamWatched(StrongPunch.DREAM_ID)));
+        // Phase 14: infected, Branch 3 = variant 2 only. The first keybind-driven ability (slot 1, R),
+        // which is why the registry carries a slot and a press hook at all.
+        register(Ability.restrictedTo(DiggingIn.ABILITY_ID, AbilitySide.INFECTED, DiggingIn.VARIANT,
+                        new UnlockCondition.DreamWatched(DiggingIn.DREAM_ID))
+                .withKeybind(DiggingIn.KEYBIND_SLOT, DiggingInManager::onKeyPress));
+        // Phase 15: Branch 1's second ability. Its dream is queued when the Hive-Mind unlocks (not at variant
+        // assignment), and watching it is the whole unlock. Used by right-clicking the Hive-Mind wand.
+        register(Ability.restrictedTo(CallOfTheHive.ABILITY_ID, AbilitySide.INFECTED, CallOfTheHive.VARIANT,
+                        new UnlockCondition.DreamAfterAbility(HiveMind.ABILITY_ID, CallOfTheHive.DREAM_ID))
+                .unlockedWhenMet());
+    }
+
+    /**
+     * The dreams to queue the moment {@code abilityId} is unlocked: those of every ability whose condition
+     * is "{@code abilityId} unlocked, then this dream watched". Registry-driven like
+     * {@link #prerequisiteDreamsFor}, so chaining a further ability needs no change at the unlock site.
+     */
+    public static List<String> dreamsQueuedOnUnlockOf(String abilityId) {
+        List<String> dreams = new ArrayList<>();
+        for (Ability ability : BY_ID.values()) {
+            if (ability.unlockCondition() instanceof UnlockCondition.DreamAfterAbility chained
+                    && chained.abilityId().equals(abilityId)
+                    && !dreams.contains(chained.dreamId())) {
+                dreams.add(chained.dreamId());
+            }
+        }
+        return dreams;
+    }
+
+    /**
+     * The ability this player has in keybind {@code slot}, if any - the whole of the slot lookup, split out
+     * from the router so it can be exercised without a networked player.
+     *
+     * <p>Empty is the normal, common answer: an unbound slot, a slot whose ability they have not unlocked,
+     * or a player on the wrong side or variant. At most one ability can ever match, because slots are
+     * declared per ability and the side/variant restrictions are mutually exclusive.
+     */
+    public static Optional<Ability> findKeybindAbility(Player player, int slot) {
+        for (Ability ability : BY_ID.values()) {
+            if (ability.usesKeybindSlot(slot)
+                    && AbilityManager.hasAbility(player, ability.id())
+                    && ability.appliesTo(player)) {
+                return Optional.of(ability);
+            }
+        }
+        return Optional.empty();
     }
 
     /**

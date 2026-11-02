@@ -1,0 +1,16 @@
+{
+  "anchor": { "type": "player" },
+  "waypoints": [
+    { "offset": [0, 1, 0],   "yaw": 0,  "pitch": 60, "durationTicks": 0,   "easing": "linear" },
+    { "offset": [0, -12, 0], "yaw": 90, "pitch": 80, "durationTicks": 130, "easing": "ease_in" },
+    { "offset": [0, -30, 4], "yaw": 180, "pitch": 20, "durationTicks": 130, "easing": "ease_out" }
+  ],
+  "subtitles": [
+    { "atTick": 20,  "durationTicks": 90, "translate": "dream.apolinumarise.diggingin.line1" },
+    { "atTick": 150, "durationTicks": 90, "translate": "dream.apolinumarise.diggingin.line2" }
+  ],
+  "sounds": [
+    { "atTick": 0,   "sound": "minecraft:ambient.cave",                  "volume": 1.0, "pitch": 0.4 },
+    { "atTick": 135, "sound": "minecraft:block.gravel.break",            "volume": 1.0, "pitch": 0.5 }
+  ]
+}

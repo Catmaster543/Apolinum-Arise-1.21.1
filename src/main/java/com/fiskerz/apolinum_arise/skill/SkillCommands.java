@@ -1,9 +1,15 @@
 package com.fiskerz.apolinum_arise.skill;
 
+import com.fiskerz.apolinum_arise.ability.Abilities;
+import com.fiskerz.apolinum_arise.ability.Ability;
+import com.fiskerz.apolinum_arise.ability.AbilityManager;
+import com.fiskerz.apolinum_arise.ability.AbilitySide;
 import com.fiskerz.apolinum_arise.config.Config;
+import com.fiskerz.apolinum_arise.infection.InfectionLogic;
 import com.fiskerz.apolinum_arise.quests.QuestGates;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
@@ -20,6 +26,8 @@ import net.minecraft.server.level.ServerPlayer;
  * <pre>
  *   /apolinumskills profile [player]  - access, variant, stats, branch, and each configured gate's state
  *   /apolinumskills reset [player]    - wipe the profile so the one-shot assignments can be re-observed
+ *   /apolinumskills setvariant <0-2> [player]
+ *                                     - switch an infected player's variant, with its dreams and gate
  * </pre>
  *
  * <p>{@code reset} exists purely so a test can be repeated: every assignment in this phase is deliberately
@@ -39,7 +47,14 @@ public final class SkillCommands {
                 .then(Commands.literal("reset")
                         .executes(ctx -> reset(ctx, ctx.getSource().getPlayerOrException()))
                         .then(Commands.argument("player", EntityArgument.player())
-                                .executes(ctx -> reset(ctx, EntityArgument.getPlayer(ctx, "player"))))));
+                                .executes(ctx -> reset(ctx, EntityArgument.getPlayer(ctx, "player")))))
+                .then(Commands.literal("setvariant")
+                        .then(Commands.argument("variant", IntegerArgumentType.integer(0, InfectedVariants.COUNT - 1))
+                                .executes(ctx -> setVariant(ctx, ctx.getSource().getPlayerOrException(),
+                                        IntegerArgumentType.getInteger(ctx, "variant")))
+                                .then(Commands.argument("player", EntityArgument.player())
+                                        .executes(ctx -> setVariant(ctx, EntityArgument.getPlayer(ctx, "player"),
+                                                IntegerArgumentType.getInteger(ctx, "variant")))))));
     }
 
     private static int profile(CommandContext<CommandSourceStack> context, ServerPlayer player)
@@ -95,6 +110,63 @@ public final class SkillCommands {
                         + "infected, and the branch choice on their next skill-screen open.\n"
                         + "NOTE: this does NOT un-complete their quest gates, so previously revealed chapters "
                         + "stay visible. Use /apolinumquests resetgates for a fully ungated state."), true);
+        return 1;
+    }
+
+    /**
+     * Put an infected player on a chosen variant, with everything the real roll would have done for it -
+     * see {@link InfectedVariants#switchTo}. Refused for a player who is not infected, because no infected
+     * ability applies to them and the variant would just be a number nobody reads.
+     */
+    private static int setVariant(CommandContext<CommandSourceStack> context, ServerPlayer player, int variant) {
+        String name = player.getGameProfile().getName();
+        if (!InfectionLogic.isInfected(player)) {
+            context.getSource().sendFailure(Component.literal(name + " is not infected, so no infected variant "
+                    + "can apply to them. Run /infection set " + name + " infected first."));
+            return 0;
+        }
+
+        InfectedVariants.Switch result = InfectedVariants.switchTo(player, variant);
+        if (!result.changed()) {
+            context.getSource().sendSuccess(() -> Component.literal(
+                    name + " already holds infected variant " + variant + " - nothing changed."), false);
+            return 0;
+        }
+
+        StringBuilder text = new StringBuilder(name).append(": infected variant ")
+                .append(InfectedVariants.isValidIndex(result.previous()) ? String.valueOf(result.previous()) : "unassigned")
+                .append(" -> ").append(variant);
+        if (InfectedVariants.isValidIndex(result.previous())) {
+            text.append("\n  old gate: ").append(result.gateObjectsClosed() > 0
+                    ? "closed (" + result.gateObjectsClosed() + " quest object(s) reset)"
+                    : "nothing to close (no usable gate id configured for variant " + result.previous() + ")");
+            if (!result.unqueuedDreams().isEmpty()) {
+                text.append("\n  took back unplayed dream(s): ").append(String.join(", ", result.unqueuedDreams()));
+            }
+        }
+        text.append("\n  new gate: ").append(result.gate() == null
+                ? "not attempted" : result.gate().explain("infected variant " + variant));
+        text.append("\n  queued: ").append(result.queuedDreams().isEmpty()
+                ? "nothing" : String.join(", ", result.queuedDreams()) + " (plays on their next nap)");
+
+        text.append("\n  abilities:");
+        for (Ability ability : Abilities.all()) {
+            if (ability.side() != AbilitySide.INFECTED) {
+                continue;
+            }
+            String state = AbilityManager.canUse(player, ability.id()) ? "ACTIVE"
+                    : AbilityManager.hasAbility(player, ability.id()) ? "dormant (earned, other variant)"
+                    : "not earned";
+            text.append("\n    ").append(ability.id()).append(" [").append(ability.describeRestriction())
+                    .append("]: ").append(state);
+        }
+        if (!SkillLogic.hasInfectedAccess(player)) {
+            text.append("\n  NOTE: no infected-side access yet - the skill screen opens at the next Blood Moon, "
+                    + "which will keep this variant rather than rolling. Abilities apply regardless.");
+        }
+
+        String message = text.toString();
+        context.getSource().sendSuccess(() -> Component.literal(message), true);
         return 1;
     }
 

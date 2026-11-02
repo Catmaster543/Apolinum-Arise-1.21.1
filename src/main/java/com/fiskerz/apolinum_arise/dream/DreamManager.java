@@ -93,6 +93,24 @@ public final class DreamManager {
     }
 
     /**
+     * Take a dream back out of a player's queue, every copy of it, before it plays. Returns whether anything
+     * was removed. A dream already playing is not affected - it was popped off the queue when it started.
+     */
+    public static boolean unqueueDream(Player player, String dreamId) {
+        if (dreamId == null || dreamId.isBlank()) {
+            return false;
+        }
+        DreamData data = player.getData(DreamAttachments.DREAMS);
+        DreamData next = data.withoutQueued(dreamId);
+        if (next == data) {
+            return false;
+        }
+        player.setData(DreamAttachments.DREAMS, next);
+        Apolinumarise.LOGGER.debug("[Dream] Unqueued '{}' for {}.", dreamId, player.getGameProfile().getName());
+        return true;
+    }
+
+    /**
      * Tell the player they have something worth sleeping for, but only on the EMPTY -> NON-EMPTY edge.
      *
      * <p>Keying on the transition rather than on each addition is what makes this fire once when several
@@ -180,13 +198,16 @@ public final class DreamManager {
     public static boolean markWatched(Player player, String dreamId) {
         DreamData data = player.getData(DreamAttachments.DREAMS);
         DreamData next = data.withWatched(dreamId);
-        if (next == data) {
-            return false;
+        boolean newlyWatched = next != data;
+        if (newlyWatched) {
+            player.setData(DreamAttachments.DREAMS, next);
+            Apolinumarise.LOGGER.info("[Dream] {} has now watched '{}'.",
+                    player.getGameProfile().getName(), dreamId);
         }
-        player.setData(DreamAttachments.DREAMS, next);
-        Apolinumarise.LOGGER.info("[Dream] {} has now watched '{}'.",
-                player.getGameProfile().getName(), dreamId);
-        return true;
+        // Phase 15: a watched dream can complete an ability whose watching IS the unlock. Evaluated on a
+        // repeat watch too, in case the other half of its condition was only met since the first one.
+        com.fiskerz.apolinum_arise.ability.AbilityManager.grantMetAutoUnlocks(player);
+        return newlyWatched;
     }
 
     /** Debug only: forget that a dream was watched, so a prerequisite can be re-tested from unmet. */

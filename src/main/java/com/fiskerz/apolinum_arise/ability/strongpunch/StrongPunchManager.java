@@ -87,7 +87,7 @@ public final class StrongPunchManager {
             return;
         }
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-            if (StrongPunch.isUnlockedFor(player)) {
+            if (StrongPunch.isActiveFor(player)) {
                 tickPlayer(player);
             } else if (CHARGES.containsKey(player.getUUID())) {
                 CHARGES.remove(player.getUUID()); // lost the ability - forget everything

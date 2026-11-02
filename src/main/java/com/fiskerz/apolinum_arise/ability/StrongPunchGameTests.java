@@ -62,16 +62,20 @@ public class StrongPunchGameTests {
         helper.assertTrue(ability.isUnlockableBy(player), "Watching the dream is the entire condition");
 
         // Variant 1 must not qualify, and the registry-driven prerequisite lookup must agree.
-        Player variantOne = helper.makeMockPlayer(GameType.SURVIVAL);
-        variantOne.setData(InfectionAttachments.INFECTION, InfectionData.NONE.becomeInfected());
-        variantOne.setData(SkillAttachments.SKILL_PROFILE, SkillProfileData.NONE.withInfectedVariant(1));
-        helper.assertFalse(ability.appliesTo(variantOne), "Variant 1 must not qualify");
+        Player otherVariantPlayer = helper.makeMockPlayer(GameType.SURVIVAL);
+        otherVariantPlayer.setData(InfectionAttachments.INFECTION, InfectionData.NONE.becomeInfected());
+        int otherVariant = StrongPunch.VARIANT == 0 ? 1 : 0;
+        otherVariantPlayer.setData(SkillAttachments.SKILL_PROFILE,
+                SkillProfileData.NONE.withInfectedVariant(otherVariant));
+        helper.assertFalse(ability.appliesTo(otherVariantPlayer),
+                "Variant " + otherVariant + " must not qualify for the variant-" + StrongPunch.VARIANT + " ability");
 
         List<String> forTwo = Abilities.prerequisiteDreamsFor(AbilitySide.INFECTED, StrongPunch.VARIANT);
         helper.assertTrue(forTwo.contains(StrongPunch.DREAM_ID),
                 "Variant 2's assignment must queue the strong-punch dream, got " + forTwo);
-        helper.assertFalse(Abilities.prerequisiteDreamsFor(AbilitySide.INFECTED, 1).contains(StrongPunch.DREAM_ID),
-                "...and variant 1's must not");
+        helper.assertFalse(Abilities.prerequisiteDreamsFor(AbilitySide.INFECTED, otherVariant)
+                        .contains(StrongPunch.DREAM_ID),
+                "...and another variant's must not");
         helper.succeed();
     }
 

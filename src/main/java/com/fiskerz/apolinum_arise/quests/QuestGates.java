@@ -117,6 +117,18 @@ public final class QuestGates {
         return QuestGatesInternal.resetGates(player, configuredGateIds());
     }
 
+    /**
+     * Un-complete a single gate for this player, plus what it was revealing - and nothing else. Returns how
+     * many quest objects were reset; 0 for an unconfigured or unresolvable id, which simply means there was
+     * nothing to close.
+     */
+    public static int resetGate(ServerPlayer player, String gateCodeString) {
+        if (gateCodeString == null || gateCodeString.isBlank() || !ApolinumQuests.isQuestsLoaded()) {
+            return 0;
+        }
+        return QuestGatesInternal.resetGate(player, gateCodeString);
+    }
+
     /** How many known gates are still complete for this player - the check that a reset actually landed. */
     public static int completedGateCount(ServerPlayer player) {
         if (!ApolinumQuests.isQuestsLoaded()) {

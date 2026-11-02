@@ -128,12 +128,13 @@ public final class SkillLogic {
      * assignment is still correct and still permanent in that case - only the quest content is missing - so
      * the right response is to tell them rather than to roll the choice back.
      */
-    static void openGateFor(ServerPlayer player, String gateCodeString, String what) {
+    static QuestGates.GateResult openGateFor(ServerPlayer player, String gateCodeString, String what) {
         QuestGates.GateResult result = QuestGates.completeGate(player, gateCodeString, what);
         if (!result.opened()) {
             player.sendSystemMessage(Component.literal("[Apolinum] " + result.explain(what))
                     .withStyle(ChatFormatting.RED));
         }
+        return result;
     }
 
     // ---------------------------------------------------------------- mutual exclusivity

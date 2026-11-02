@@ -11,6 +11,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 
 /** The wand's drop: the one way the Hive-Mind ability is obtained in normal play. */
 public final class HiveMindEvents {
@@ -56,6 +57,22 @@ public final class HiveMindEvents {
             return false;
         }
         return random.nextDouble() < Config.HIVE_MIND_DROP_CHANCE.get();
+    }
+
+    // Phase 15: vanilla item cooldowns live on the player entity, so the Call of the Hive cooldown overlay is
+    // lost on relog, on respawn, and client-side on a dimension change (a new client player). Re-show it from
+    // the persisted deadline at each of those - the deadline itself was never lost.
+
+    public static void onPlayerLoggedIn(PlayerEvent.PlayerLoggedInEvent event) {
+        CallOfTheHive.restoreCooldownDisplay(event.getEntity());
+    }
+
+    public static void onPlayerRespawn(PlayerEvent.PlayerRespawnEvent event) {
+        CallOfTheHive.restoreCooldownDisplay(event.getEntity());
+    }
+
+    public static void onChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        CallOfTheHive.restoreCooldownDisplay(event.getEntity());
     }
 
     /**

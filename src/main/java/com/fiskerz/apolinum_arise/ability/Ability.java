@@ -19,17 +19,54 @@ import net.minecraft.world.entity.player.Player;
  * @param restrictedTo   the variant (infected) or branch (healthy) this is limited to, or empty for an
  *                       ability the whole side can have - not every ability needs a restriction
  * @param unlockCondition what must be true before the ability may be unlocked
+ * @param unlocksWhenMet  whether meeting the condition IS the unlock (granted automatically when a dream is
+ *                        marked watched), rather than something else - an item drop - doing the granting
  */
-public record Ability(String id, AbilitySide side, OptionalInt restrictedTo, UnlockCondition unlockCondition) {
+public record Ability(String id, AbilitySide side, OptionalInt restrictedTo, UnlockCondition unlockCondition,
+                      OptionalInt keybindSlot, KeyPressHandler keyPressHandler, boolean unlocksWhenMet) {
 
-    /** An ability available to a whole side, with no variant/branch restriction. */
+    /** Lowest and highest ability keybind slot. Three slots, shared by every ability in the game. */
+    public static final int MIN_KEYBIND_SLOT = 1;
+    public static final int MAX_KEYBIND_SLOT = 3;
+
+    /** An ability available to a whole side, with no variant/branch restriction and no keybind. */
     public static Ability of(String id, AbilitySide side, UnlockCondition unlockCondition) {
-        return new Ability(id, side, OptionalInt.empty(), unlockCondition);
+        return new Ability(id, side, OptionalInt.empty(), unlockCondition, OptionalInt.empty(), null, false);
     }
 
-    /** An ability limited to one variant (infected) or one branch (healthy). */
+    /** An ability limited to one variant (infected) or one branch (healthy), with no keybind. */
     public static Ability restrictedTo(String id, AbilitySide side, int subdivision, UnlockCondition condition) {
-        return new Ability(id, side, OptionalInt.of(subdivision), condition);
+        return new Ability(id, side, OptionalInt.of(subdivision), condition, OptionalInt.empty(), null, false);
+    }
+
+    /**
+     * The same ability, granted automatically the moment its condition is met (checked whenever a dream is
+     * marked watched - see {@link AbilityManager#grantMetAutoUnlocks}). Off by default because for some
+     * abilities the condition is only a prerequisite: the Hive-Mind's is met by its dream, but the wand drop
+     * is the unlock.
+     */
+    public Ability unlockedWhenMet() {
+        return new Ability(id, side, restrictedTo, unlockCondition, keybindSlot, keyPressHandler, true);
+    }
+
+    /**
+     * The same ability, triggered by one of the three shared ability keybind slots.
+     *
+     * <p>Kept as a copy-with rather than another constructor parameter so the many abilities that are not
+     * keybind-driven - an item, a passive, a held input - declare nothing about keybinds at all.
+     */
+    public Ability withKeybind(int slot, KeyPressHandler handler) {
+        if (slot < MIN_KEYBIND_SLOT || slot > MAX_KEYBIND_SLOT) {
+            throw new IllegalArgumentException("Ability keybind slot must be "
+                    + MIN_KEYBIND_SLOT + ".." + MAX_KEYBIND_SLOT + ", got " + slot);
+        }
+        return new Ability(id, side, restrictedTo, unlockCondition, OptionalInt.of(slot),
+                java.util.Objects.requireNonNull(handler, "a keybind slot needs a handler"), unlocksWhenMet);
+    }
+
+    /** Whether this ability is the one that should answer a press of {@code slot} - before any player check. */
+    public boolean usesKeybindSlot(int slot) {
+        return keybindSlot.isPresent() && keybindSlot.getAsInt() == slot;
     }
 
     /**

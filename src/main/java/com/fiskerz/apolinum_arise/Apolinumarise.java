@@ -7,6 +7,8 @@ import com.mojang.logging.LogUtils;
 import com.fiskerz.apolinum_arise.ability.AbilityAttachments;
 import com.fiskerz.apolinum_arise.ability.AbilityCommands;
 import com.fiskerz.apolinum_arise.ability.Abilities;
+import com.fiskerz.apolinum_arise.ability.diggingin.BurrowAttachments;
+import com.fiskerz.apolinum_arise.ability.diggingin.DiggingInEvents;
 import com.fiskerz.apolinum_arise.ability.hivemind.HiveMindEvents;
 import com.fiskerz.apolinum_arise.ability.hivemind.HiveMindRegistry;
 import com.fiskerz.apolinum_arise.ability.strongpunch.StrongPunchManager;
@@ -67,7 +69,9 @@ public class Apolinumarise {
         DreamAttachments.register(modEventBus);
         DreamRegistry.register(modEventBus);
         AbilityAttachments.register(modEventBus);
+        BurrowAttachments.register(modEventBus);
         HiveMindRegistry.register(modEventBus);
+        com.fiskerz.apolinum_arise.ability.hivemind.HiveMindAttachments.register(modEventBus);
         // Phase 12: build the ability registry now, so it is complete before anything can query it.
         Abilities.init();
         // Phase 11a: FTB Quests integration. No-op (and never touches FTB classes) when it is absent.
@@ -126,8 +130,28 @@ public class Apolinumarise {
 
         // Phase 12 ability system: the Hive-Mind wand's drop hangs off vanilla kill credit.
         NeoForge.EVENT_BUS.addListener(HiveMindEvents::onLivingDeath);
+        // Phase 15 Call of the Hive: put the persisted cooldown back on the wand wherever vanilla drops it.
+        NeoForge.EVENT_BUS.addListener(HiveMindEvents::onPlayerLoggedIn);
+        NeoForge.EVENT_BUS.addListener(HiveMindEvents::onPlayerRespawn);
+        NeoForge.EVENT_BUS.addListener(HiveMindEvents::onChangedDimension);
         // Phase 13 Strong Punch: server-authoritative charge tracking, ticked for unlocked players only.
         NeoForge.EVENT_BUS.addListener(Apolinumarise::onAbilityServerTick);
+
+        // Phase 14 Digging In. The death listener runs at HIGH priority so the eject happens BEFORE the
+        // Phase 7 downed system consumes the same event - the player must go down in open space.
+        NeoForge.EVENT_BUS.addListener(net.neoforged.bus.api.EventPriority.HIGH, DiggingInEvents::onLivingDeath);
+        NeoForge.EVENT_BUS.addListener(DiggingInEvents::onPlayerTickPost);
+        NeoForge.EVENT_BUS.addListener(DiggingInEvents::onAttackEntity);
+        NeoForge.EVENT_BUS.addListener(DiggingInEvents::onLeftClickBlock);
+        NeoForge.EVENT_BUS.addListener(DiggingInEvents::onRightClickBlock);
+        NeoForge.EVENT_BUS.addListener(DiggingInEvents::onRightClickItem);
+        NeoForge.EVENT_BUS.addListener(DiggingInEvents::onEntityInteract);
+        NeoForge.EVENT_BUS.addListener(DiggingInEvents::onBlockBreak);
+        NeoForge.EVENT_BUS.addListener(DiggingInEvents::onEntityPlace);
+        NeoForge.EVENT_BUS.addListener(DiggingInEvents::onPlayerLoggedOut);
+        NeoForge.EVENT_BUS.addListener(DiggingInEvents::onPlayerLoggedIn);
+        NeoForge.EVENT_BUS.addListener(DiggingInEvents::onTravelToDimension);
+        NeoForge.EVENT_BUS.addListener(DiggingInEvents::onChangedDimension);
 
         // SERVER config: per-world, admin-controlled (see config.Config)
         modContainer.registerConfig(ModConfig.Type.SERVER, Config.SPEC);

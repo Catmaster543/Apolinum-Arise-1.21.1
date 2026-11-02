@@ -22,6 +22,9 @@ import net.neoforged.neoforge.client.gui.ConfigurationScreen;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.client.gui.VanillaGuiLayers;
 
+import com.fiskerz.apolinum_arise.ability.client.AbilityClientEvents;
+import com.fiskerz.apolinum_arise.ability.client.AbilityKeybinds;
+import com.fiskerz.apolinum_arise.ability.client.DiggingInClientEvents;
 import com.fiskerz.apolinum_arise.ability.client.StrongPunchClientEvents;
 import com.fiskerz.apolinum_arise.bloodmoon.BloodMoonRegistry;
 import com.fiskerz.apolinum_arise.bloodmoon.client.BloodMoonClientEvents;
@@ -57,6 +60,7 @@ public class ApolinumariseClient {
         modEventBus.addListener(ApolinumariseClient::onRegisterMenuScreens);
         modEventBus.addListener(DownedKeybinds::register);
         modEventBus.addListener(SkillKeybind::register);
+        modEventBus.addListener(AbilityKeybinds::register);
         modEventBus.addListener(DownedClientEvents::onRegisterGuiLayers);
         modEventBus.addListener(ApolinumariseClient::onRegisterGuiLayers);
         modEventBus.addListener(ApolinumariseClient::onRegisterReloadListeners);
@@ -83,6 +87,12 @@ public class ApolinumariseClient {
         // Phase 13: report the raw attack-key state so the server can run a held-input charge. Only sends
         // while the local player actually has Strong Punch and an empty hand - see the class javadoc.
         NeoForge.EVENT_BUS.addListener(StrongPunchClientEvents::onClientTickPost);
+        // Phase 14: the three shared ability keybinds, and the burrowed movement/overlay behaviour.
+        NeoForge.EVENT_BUS.addListener(AbilityClientEvents::onClientTickPost);
+        NeoForge.EVENT_BUS.addListener(DiggingInClientEvents::onMovementInput);
+        NeoForge.EVENT_BUS.addListener(DiggingInClientEvents::onPlayerTickPost);
+        NeoForge.EVENT_BUS.addListener(DiggingInClientEvents::onRenderBlockScreenEffect);
+        NeoForge.EVENT_BUS.addListener(DiggingInClientEvents::onClientTickPost);
     }
 
     private static void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {

@@ -48,4 +48,25 @@ public interface UnlockCondition {
             return "dream '" + dreamId + "' watched";
         }
     }
+
+    /**
+     * The player has unlocked {@code abilityId}, and has watched {@code dreamId} - a dream that is queued
+     * at the moment {@code abilityId} unlocks (see {@link AbilityManager#unlockAbility}), so it chains one
+     * ability onto another.
+     *
+     * <p>Deliberately NOT a {@link DreamWatched}: {@link Abilities#prerequisiteDreamsFor} queues every
+     * {@code DreamWatched} dream of a variant at variant assignment, and this dream must wait for the
+     * earlier ability instead.
+     */
+    record DreamAfterAbility(String abilityId, String dreamId) implements UnlockCondition {
+        @Override
+        public boolean isMet(Player player) {
+            return AbilityManager.hasAbility(player, abilityId) && DreamManager.hasWatched(player, dreamId);
+        }
+
+        @Override
+        public String describe() {
+            return "ability '" + abilityId + "' unlocked, then dream '" + dreamId + "' watched";
+        }
+    }
 }

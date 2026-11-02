@@ -39,6 +39,16 @@ public record DreamData(List<String> queue, Set<String> receivedBroadcasts, Set<
         return new DreamData(List.copyOf(next), receivedBroadcasts, watched);
     }
 
+    /** Drop every queued copy of one dream id. Returns {@code this} when it was not queued at all. */
+    public DreamData withoutQueued(String dreamId) {
+        if (!queue.contains(dreamId)) {
+            return this;
+        }
+        List<String> next = new ArrayList<>(queue);
+        next.removeIf(dreamId::equals);
+        return new DreamData(List.copyOf(next), receivedBroadcasts, watched);
+    }
+
     /** Remove and return nothing - the caller reads {@link #queue()} first. Pops the head. */
     public DreamData withHeadPopped() {
         if (queue.isEmpty()) {

@@ -32,5 +32,9 @@ public final class ModNetworking {
         // (Phase 13). Carries no target and no progress - see AttackHeldPayload.
         registrar.playToServer(AttackHeldPayload.TYPE, AttackHeldPayload.STREAM_CODEC,
             AttackHeldHandler::handle);
+        // Client -> server: one of the three shared ability keybind slots was pressed (Phase 14). Carries
+        // the slot only; the server looks up what the player has in it.
+        registrar.playToServer(AbilityKeyPressPayload.TYPE, AbilityKeyPressPayload.STREAM_CODEC,
+            AbilityKeyPressHandler::handle);
     }
 }

@@ -41,6 +41,19 @@ import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 public class AbilityGameTests {
 
     /** An infected player of the given variant, with nothing watched and no abilities. */
+    /**
+     * Any infected variant index that is NOT the one given - so a test can say "a different variant"
+     * without hardcoding a number that goes stale the moment the branch-to-variant mapping shifts.
+     */
+    private static int someOtherVariantThan(int variant) {
+        for (int other = 0; other < com.fiskerz.apolinum_arise.skill.InfectedVariants.COUNT; other++) {
+            if (other != variant) {
+                return other;
+            }
+        }
+        throw new IllegalStateException("there is only one variant, so no 'other' exists");
+    }
+
     private static Player infectedVariant(GameTestHelper helper, int variant) {
         Player player = helper.makeMockPlayer(GameType.SURVIVAL);
         player.setData(InfectionAttachments.INFECTION, InfectionData.NONE.becomeInfected());
@@ -58,11 +71,16 @@ public class AbilityGameTests {
         helper.assertTrue(hiveMind != null, "The Hive-Mind ability must be registered");
 
         helper.assertTrue(hiveMind.appliesTo(infectedVariant(helper, HiveMind.VARIANT)),
-                "An infected variant-1 player is the right kind of player for it");
-        helper.assertFalse(hiveMind.appliesTo(infectedVariant(helper, 0)),
+                "An infected player of its own variant is the right kind of player for it");
+        helper.assertFalse(hiveMind.appliesTo(infectedVariant(helper, someOtherVariantThan(HiveMind.VARIANT))),
                 "A different variant must not qualify");
-        helper.assertFalse(hiveMind.appliesTo(infectedVariant(helper, 2)),
-                "Nor must the third variant");
+        for (int other = 0; other < com.fiskerz.apolinum_arise.skill.InfectedVariants.COUNT; other++) {
+            if (other == HiveMind.VARIANT) {
+                continue;
+            }
+            helper.assertFalse(hiveMind.appliesTo(infectedVariant(helper, other)),
+                    "Variant " + other + " must not qualify for the variant-" + HiveMind.VARIANT + " ability");
+        }
 
         // Assigned the right variant but no longer infected: the side check must catch it.
         Player cured = infectedVariant(helper, HiveMind.VARIANT);
@@ -125,7 +143,7 @@ public class AbilityGameTests {
         try {
             RandomSource random = RandomSource.create(99L);
 
-            Player wrongVariant = infectedVariant(helper, 0);
+            Player wrongVariant = infectedVariant(helper, someOtherVariantThan(HiveMind.VARIANT));
             DreamManager.markWatched(wrongVariant, HiveMind.DREAM_ID);
             helper.assertFalse(HiveMindEvents.shouldDrop(wrongVariant, random),
                     "Variant 0 must never get the variant-1 wand, even having watched the dream");
@@ -151,29 +169,30 @@ public class AbilityGameTests {
      * DELIVERABLE: the unlock is a permanent per-player flag, independent of holding the item.
      *
      * <p>Mirrors the hand test: A loots the wand and is unlocked, drops it, and B picks it up. The wand is
-     * the same stack; the only thing that differs is whose data is asked. {@link HiveMind#isUnlockedFor} is
+     * the same stack; the only thing that differs is whose data is asked. {@link HiveMind#isActiveFor} is
      * exactly the check {@code HiveMindStickItem.hurtEnemy} makes before doing anything special.
      */
     @GameTest(template = "empty_3x3", batch = "ability_hivemind")
     public static void the_unlock_belongs_to_the_player_not_the_item(GameTestHelper helper) {
         Player a = infectedVariant(helper, HiveMind.VARIANT);
-        Player b = infectedVariant(helper, 0); // different variant - "different/no variant" in the test plan
+        // A different variant, derived from the constant so it cannot go stale.
+        Player b = infectedVariant(helper, someOtherVariantThan(HiveMind.VARIANT));
 
         DreamManager.markWatched(a, HiveMind.DREAM_ID);
         helper.assertTrue(AbilityManager.unlockAbility(a, HiveMind.ABILITY_ID), "A unlocks on receiving it");
 
         ItemStack wand = new ItemStack(HiveMindRegistry.HIVE_MIND_STICK.get());
         a.getInventory().add(wand.copy());
-        helper.assertTrue(HiveMind.isUnlockedFor(a), "A is unlocked while holding the wand");
+        helper.assertTrue(HiveMind.isActiveFor(a), "A is unlocked while holding the wand");
 
         // A drops it: possession changes, the unlock does not.
         a.getInventory().clearContent();
-        helper.assertTrue(HiveMind.isUnlockedFor(a),
+        helper.assertTrue(HiveMind.isActiveFor(a),
                 "A must stay unlocked after dropping the wand - the item is not the ability");
 
         // B picks up the very same item and is still nobody special.
         b.getInventory().add(wand.copy());
-        helper.assertFalse(HiveMind.isUnlockedFor(b),
+        helper.assertFalse(HiveMind.isActiveFor(b),
                 "B holding the wand must NOT trigger the hive-mind effect - the ability is per player");
         helper.assertFalse(AbilityManager.hasAbility(b, HiveMind.ABILITY_ID), "B has unlocked nothing");
 
@@ -296,22 +315,22 @@ public class AbilityGameTests {
         Player locked = infectedVariant(helper, HiveMind.VARIANT);
         locked.setPos(helper.absoluteVec(net.minecraft.world.phys.Vec3.atCenterOf(centre)));
 
-        helper.assertFalse(HiveMind.isUnlockedFor(locked),
+        helper.assertFalse(HiveMind.isActiveFor(locked),
                 "Having the variant and the wand is not the ability - only the unlock is");
 
         LivingEntity struck = helper.spawn(EntityType.COW, centre);
         Zombie bystander = helper.spawn(EntityType.ZOMBIE, centre);
 
         // What hurtEnemy does: nothing at all unless unlocked, so the bystander keeps its own target.
-        if (HiveMind.isUnlockedFor(locked)) {
+        if (HiveMind.isActiveFor(locked)) {
             HiveMindEffect.trigger(locked, struck);
         }
         helper.assertTrue(bystander.getTarget() == null,
                 "A locked wielder's swing must not retarget anything");
 
         AbilityManager.unlockAbility(locked, HiveMind.ABILITY_ID);
-        helper.assertTrue(HiveMind.isUnlockedFor(locked), "Now unlocked");
-        if (HiveMind.isUnlockedFor(locked)) {
+        helper.assertTrue(HiveMind.isActiveFor(locked), "Now unlocked");
+        if (HiveMind.isActiveFor(locked)) {
             HiveMindEffect.trigger(locked, struck);
         }
         helper.assertTrue(bystander.getTarget() == struck,

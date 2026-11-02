@@ -2,8 +2,12 @@ package com.fiskerz.apolinum_arise.ability.hivemind;
 
 import com.fiskerz.apolinum_arise.config.Config;
 
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
@@ -63,11 +67,32 @@ public class HiveMindStickItem extends Item {
      * <p>The ability check is on the WIELDER, not the item. An unlocked player's wand does the hive-mind
      * thing; the same stack in anyone else's hand is just a stick that hits for one heart.
      */
+    /**
+     * Phase 15, Call of the Hive. For anyone without that ability this is exactly the stick it always was -
+     * the super call is vanilla's "nothing happens". With it, the client predicts a swing (it can tell: the
+     * ability, infection and variant are all self-synced) and the server does the call. A call that moved
+     * nothing returns PASS and starts no cooldown. A running cooldown never reaches here: vanilla refuses
+     * the click first because the wand carries the item cooldown.
+     */
+    @Override
+    public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
+        if (!CallOfTheHive.isActiveFor(player)) {
+            return super.use(level, player, hand);
+        }
+        ItemStack stack = player.getItemInHand(hand);
+        if (!(level instanceof ServerLevel serverLevel)) {
+            return InteractionResultHolder.success(stack);
+        }
+        return CallOfTheHive.call(serverLevel, player) > 0
+                ? InteractionResultHolder.success(stack)
+                : InteractionResultHolder.pass(stack);
+    }
+
     @Override
     public boolean hurtEnemy(ItemStack stack, LivingEntity target, LivingEntity attacker) {
         if (attacker.level() instanceof Level level && !level.isClientSide()
                 && attacker instanceof net.minecraft.world.entity.player.Player player
-                && HiveMind.isUnlockedFor(player)) {
+                && HiveMind.isActiveFor(player)) {
             HiveMindEffect.trigger(player, target);
         }
         return true;

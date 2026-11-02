@@ -21,11 +21,11 @@ public final class StrongPunch {
     /** The dream whose completion unlocks it, queued when the variant is assigned. */
     public static final String DREAM_ID = "strongpunch_whispers";
 
-    /** The infected variant this belongs to - "Branch 2" in the task, variant index 2. */
-    public static final int VARIANT = 2;
+    /** The infected variant this belongs to: Branch 2, which is variant index 1 (Branch N -&gt; index N-1). */
+    public static final int VARIANT = 1;
 
-    /** Whether this player's held attack should charge a strong punch. */
-    public static boolean isUnlockedFor(Player player) {
-        return AbilityManager.hasAbility(player, ABILITY_ID);
+    /** Whether this player's held attack should charge a strong punch: unlocked AND still variant {@link #VARIANT}. */
+    public static boolean isActiveFor(Player player) {
+        return AbilityManager.canUse(player, ABILITY_ID);
     }
 }

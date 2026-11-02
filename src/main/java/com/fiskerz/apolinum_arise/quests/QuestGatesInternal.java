@@ -109,6 +109,25 @@ final class QuestGatesInternal {
                 gateIds.add(id);
             }
         }
+        return resetGateIds(playerId, data, file, gateIds);
+    }
+
+    /**
+     * Un-complete ONE gate and what it was revealing - the variant switch's "close the old variant".
+     * Unlike {@link #resetGates} this does not sweep in the placeholder test chain, which would also close
+     * every healthy branch gate the player holds.
+     */
+    static int resetGate(ServerPlayer player, String gateCodeString) {
+        ServerQuestFile file = QuestIds.file().orElse(null);
+        TeamData data = QuestIds.teamData(player).orElse(null);
+        if (file == null || data == null || checkGate(player, gateCodeString) != GateResult.OPENED) {
+            return 0;
+        }
+        return resetGateIds(player.getUUID(), data, file, Set.of(QuestIds.parse(gateCodeString)));
+    }
+
+    /** The shared reset: these gates, their dependents, and any chapter made up entirely of dependents. */
+    private static int resetGateIds(UUID playerId, TeamData data, ServerQuestFile file, Set<Long> gateIds) {
         if (gateIds.isEmpty()) {
             return 0;
         }

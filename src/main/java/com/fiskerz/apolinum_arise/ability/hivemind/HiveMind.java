@@ -26,8 +26,8 @@ public final class HiveMind {
     /** The dream whose completion is the prerequisite, queued when the variant is assigned. */
     public static final String DREAM_ID = "hivemind_whispers";
 
-    /** The infected variant this ability belongs to - "Branch 1" in the task, variant index 1. */
-    public static final int VARIANT = 1;
+    /** The infected variant this belongs to: Branch 1, which is variant index 0 (Branch N -&gt; index N-1). */
+    public static final int VARIANT = 0;
 
     /**
      * Whether the wand may drop for this player at all. Checked BEFORE any random roll, so a player who
@@ -44,8 +44,8 @@ public final class HiveMind {
                 && !AbilityManager.hasAbility(player, ABILITY_ID);
     }
 
-    /** Whether this player's swings should trigger the hive-mind effect. Possessing the wand is not enough. */
-    public static boolean isUnlockedFor(Player player) {
-        return AbilityManager.hasAbility(player, ABILITY_ID);
+    /** Whether this player's swings should trigger the hive-mind effect: unlocked AND still variant {@link #VARIANT}. Possessing the wand is not enough. */
+    public static boolean isActiveFor(Player player) {
+        return AbilityManager.canUse(player, ABILITY_ID);
     }
 }

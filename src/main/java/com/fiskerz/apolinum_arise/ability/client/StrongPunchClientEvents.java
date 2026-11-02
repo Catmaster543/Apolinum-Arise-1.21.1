@@ -33,7 +33,7 @@ public final class StrongPunchClientEvents {
             return;
         }
 
-        boolean eligible = StrongPunch.isUnlockedFor(player) && player.getMainHandItem().isEmpty();
+        boolean eligible = StrongPunch.isActiveFor(player) && player.getMainHandItem().isEmpty();
         boolean held = eligible && minecraft.options.keyAttack.isDown() && minecraft.screen == null;
 
         if (held) {
